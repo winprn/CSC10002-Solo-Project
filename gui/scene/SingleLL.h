@@ -2,12 +2,14 @@
 #define SINGLE_LINKED_LIST_H
 
 #include "../../lib/raylib.h"
+#include "../components/GuiNode.h"
 #include <string>
 
 class SingleLL {
     struct Node {
         int val;
         Node* next;
+        GuiNode guiNode;
     };
 
     Node* head, *tail;

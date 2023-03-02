@@ -22,6 +22,7 @@ void SingleLL::add(int val) {
     Node* newNode = new Node;
     newNode->val = val;
     newNode->next = nullptr;
+    newNode->guiNode = GuiNode({(float)(50 + 100 * size), 50});
 
     if (head == nullptr) {
         head = newNode;
@@ -33,34 +34,10 @@ void SingleLL::add(int val) {
     size++;
 }
 
-void SingleLL::remove(int val) {
-    Node* cur = head;
-    Node* prev = nullptr;
-
-    while (cur != nullptr) {
-        if (cur->val == val) {
-            if (prev == nullptr) {
-                head = cur->next;
-            } else {
-                prev->next = cur->next;
-            }
-
-            delete cur;
-            break;
-        }
-
-        prev = cur;
-        cur = cur->next;
-    }
-}
-
 void SingleLL::render() {
     int idx = 0;
-    DrawText("Hi", 100, 100, 20, BLACK);
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-        Vector2 pos{(float)(50 + 100 * idx), 50};
-        GuiNode node(pos);
-        node.render();
+        cur->guiNode.render();
     }
 }
 
@@ -76,5 +53,17 @@ void SingleLL::getRandom() {
 void SingleLL::print() {
     for (Node *cur = head; cur != nullptr; cur = cur->next) {
         printf("%d ", cur->val);
+    }
+}
+
+void SingleLL::remove(int id) {
+    int idx = 0;
+    for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
+        if (idx == id) {
+            cur->guiNode.setNewOpacity(0);
+        }
+        if (idx > id) {
+            cur->guiNode.setNewPos({(float)(50 + 100 * (idx - 1)), 50});
+        }
     }
 }

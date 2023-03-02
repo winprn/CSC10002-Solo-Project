@@ -37,16 +37,17 @@ int main()
     SetTargetFPS(60);
     SingleLL ll;
     ll.add(10);
-    // ll.getRandom();
-    // CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
+    ll.getRandom();
+    CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
     while (!WindowShouldClose())
     {
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            // printf("abc");
-            // printf("%d", ll.getSize());
-            // DrawText(TextFormat("%d", ll.size), 100, 100, 20, BLACK);
-            // ll.render();
+            
+            ll.render();
+            if (GuiButton({100, 200, 100, 50}, "Delete")) {
+                ll.remove(0);
+            }
             
         EndDrawing();
     }
