@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "name": "macos-clang-arm64",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/lib/*"
+      ],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE",
+        "GRAPHICS_API_OPENGL_33",
+        "PLATFORM_DESKTOP"
+      ],
+      "compilerPath": "/usr/bin/clang",
+      "cStandard": "${default}",
+      "cppStandard": "${default}",
+      "intelliSenseMode": "macos-clang-arm64",
+      "macFrameworkPath": [
+        "/System/Library/Frameworks"
+      ]
+    }
+  ],
+  "version": 4
+}
