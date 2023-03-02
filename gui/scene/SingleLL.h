@@ -1,7 +1,7 @@
 #ifndef SINGLE_LINKED_LIST_H
 #define SINGLE_LINKED_LIST_H
 
-#include "../components/GuiNode.h"
+#include "../../lib/raylib.h"
 #include <string>
 
 class SingleLL {
@@ -10,29 +10,20 @@ class SingleLL {
         Node* next;
     };
 
-    Node* head = nullptr;
-    Node* tail = nullptr;
-    int size = 0;
+    Node* head, *tail;
 
     public:
-    char const * getSize() {}
-    void add(int val) {}
+    int size = 0;
+    SingleLL(): head(nullptr), tail(nullptr) {}
+    
+    int getSize();
+    int getHead();
 
-    void remove(int val) {}
-
-    void render() {}
-
-    void getRandom() {}
-
-    // void remove(int id) {
-    //     int idx = 0;
-    //     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-    //         if (idx == id) {
-                
-    //             break;
-    //         }
-    //     }
-    // }
+    void add(int val);
+    void render();
+    void getRandom();
+    void print();
+    void remove(int id);
 };
 
 #endif

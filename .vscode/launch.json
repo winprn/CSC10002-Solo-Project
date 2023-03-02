@@ -6,8 +6,8 @@
       "type": "lldb",
       "request": "launch",
       "args": [],
-      "cwd": "/Users/winprn/Documents/CSC10002-Solo-Project",
-      "program": "/Users/winprn/Documents/CSC10002-Solo-Project/build/Debug/outDebug"
+      "cwd": "/Users/winprn/Documents/CSC10002-Solo-Project/test",
+      "program": "/Users/winprn/Documents/CSC10002-Solo-Project/test/build/Debug/outDebug"
     }
   ]
 }
