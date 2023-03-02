@@ -26,6 +26,7 @@ class SingleLL {
     void getRandom();
     void print();
     void remove(int id);
+    void removeAll();
 };
 
 #endif

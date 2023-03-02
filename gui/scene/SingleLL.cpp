@@ -22,14 +22,18 @@ void SingleLL::add(int val) {
     Node* newNode = new Node;
     newNode->val = val;
     newNode->next = nullptr;
-    newNode->guiNode = GuiNode({(float)(50 + 100 * size), 50});
+    newNode->guiNode = GuiNode({(float)(0), 50});
+    newNode->guiNode.setVal(val);
 
     if (head == nullptr) {
         head = newNode;
         tail = newNode;
+        head->guiNode.setIsLast(true);
     } else {
         tail->next = newNode;
+        tail->guiNode.setIsLast(false);
         tail = newNode;
+        tail->guiNode.setIsLast(true);
     }
     size++;
 }
@@ -37,17 +41,16 @@ void SingleLL::add(int val) {
 void SingleLL::render() {
     int idx = 0;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-        cur->guiNode.render();
+        cur->guiNode.setNewPos({(float)(50 + 200 * idx), 50});
     }
 }
 
 void SingleLL::getRandom() {
-    int n = 4;
+    removeAll();
+    int n = max(1, rand() % 10);
     for (int i = 0; i < n; i++) {
-        add(6);
+        add(rand() % 20);
     }
-
-    printf("%d", getSize());
 }
 
 void SingleLL::print() {
@@ -58,12 +61,32 @@ void SingleLL::print() {
 
 void SingleLL::remove(int id) {
     int idx = 0;
+    Node *found;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
         if (idx == id) {
             cur->guiNode.setNewOpacity(0);
+            found = cur;
         }
         if (idx > id) {
-            cur->guiNode.setNewPos({(float)(50 + 100 * (idx - 1)), 50});
+            cur->guiNode.setNewPos({(float)(50 + 200 * (idx - 1)), 50});
         }
     }
+    
+    if (found == head) {
+        head = head->next;
+    } else {
+        Node *prev = head;
+        while (prev->next != found) {
+            prev = prev->next;
+        }
+        prev->next = found->next;
+    }
+    delete found;
+}
+
+void SingleLL::removeAll() {
+    while (head != nullptr) {
+        remove(0);
+    }
+    size = 0;
 }

@@ -8,7 +8,7 @@ class GuiNode {
     int val;
     Vector2 curPos, newPos;
     float curOpacity = 1.0, newOpacity;
-    bool isOutdated = false, isShifted = false;
+    bool isLast = false, isOutdated = false, isShifted = false;
 
     public:
     GuiNode() {}
@@ -30,26 +30,41 @@ class GuiNode {
 
         if (isShifted) {
             double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
-            curPos.x += dx / 60;
-            curPos.y += dy / 60;
+            curPos.x += dx / 30;
+            curPos.y += dy / 30;
 
-            if (fabs(dx) <= 0.001 && fabs(dy) <= 0.001) {
+            if (fabs(dx) <= 5 && fabs(dy) <= 5) {
                 curPos = newPos;
                 isShifted = false;
             }
         }
 
-        DrawRectangleLines(this->curPos.x, this->curPos.y, 50, 50, Fade(BLACK, curOpacity));
+        DrawRectangleLines(curPos.x, curPos.y, 100, 50, Fade(BLACK, curOpacity));
+        if (!isLast) {
+            DrawLine(curPos.x + 100, curPos.y + 25, curPos.x + 200, curPos.y + 25, Fade(BLACK, curOpacity));
+            DrawTriangleLines({curPos.x + 200, curPos.y + 25}, {curPos.x + 190, curPos.y + 15}, {curPos.x + 190, curPos.y + 35}, Fade(BLACK, curOpacity));
+        }
+        DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 20, 20, Fade(BLACK, curOpacity));
+    }
+
+    void setVal(int nVal) {
+        val = nVal;
+    }
+
+    void setIsLast(bool isLast) {
+        this->isLast = isLast;
     }
 
     void setNewOpacity(float opacity) {
         newOpacity = opacity;
         isOutdated = true;
+        render();
     }
 
     void setNewPos(Vector2 pos) {
         newPos = pos;
         isShifted = true;
+        render();
     }
 };
 

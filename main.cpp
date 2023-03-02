@@ -36,7 +36,6 @@ int main()
     
     SetTargetFPS(60);
     SingleLL ll;
-    ll.add(10);
     ll.getRandom();
     CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
     while (!WindowShouldClose())
@@ -47,6 +46,9 @@ int main()
             ll.render();
             if (GuiButton({100, 200, 100, 50}, "Delete")) {
                 ll.remove(0);
+            }
+            if (GuiButton({250, 200, 100, 50}, "New List")) {
+                ll.getRandom();
             }
             
         EndDrawing();
