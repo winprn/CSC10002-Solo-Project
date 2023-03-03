@@ -18,11 +18,15 @@ class GuiNode {
         return curPos;
     }
 
+    float getOpacity() {
+        return curOpacity;
+    }
+
     void render() {
         if (isOutdated) {
             curOpacity -= 0.02;
             
-            if (fabs(curOpacity - newOpacity) <= 0.001) {
+            if (fabs(curOpacity - newOpacity) <= 0.1) {
                 curOpacity = 0;
                 isOutdated = false;
             }
@@ -33,13 +37,14 @@ class GuiNode {
             curPos.x += dx / 30;
             curPos.y += dy / 30;
 
-            if (fabs(dx) <= 5 && fabs(dy) <= 5) {
+            if (fabs(dx) <= 2 && fabs(dy) <= 2) {
                 curPos = newPos;
                 isShifted = false;
             }
         }
 
-        DrawRectangleLines(curPos.x, curPos.y, 100, 50, Fade(BLACK, curOpacity));
+        Rectangle rect = {curPos.x, curPos.y, 100, 50};
+        DrawRectangleRoundedLines(rect, 10, 16, 2, Fade(BLACK, curOpacity));
         if (!isLast) {
             DrawLine(curPos.x + 100, curPos.y + 25, curPos.x + 200, curPos.y + 25, Fade(BLACK, curOpacity));
             DrawTriangleLines({curPos.x + 200, curPos.y + 25}, {curPos.x + 190, curPos.y + 15}, {curPos.x + 190, curPos.y + 35}, Fade(BLACK, curOpacity));

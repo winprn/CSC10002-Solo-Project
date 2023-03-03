@@ -40,13 +40,14 @@ void SingleLL::add(int val) {
 
 void SingleLL::render() {
     int idx = 0;
+    removeFromLL();
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
         cur->guiNode.setNewPos({(float)(50 + 200 * idx), 50});
     }
 }
 
 void SingleLL::getRandom() {
-    removeAll();
+    // removeAll();
     int n = max(1, rand() % 10);
     for (int i = 0; i < n; i++) {
         add(rand() % 20);
@@ -61,27 +62,11 @@ void SingleLL::print() {
 
 void SingleLL::remove(int id) {
     int idx = 0;
-    Node *found;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
         if (idx == id) {
             cur->guiNode.setNewOpacity(0);
-            found = cur;
-        }
-        if (idx > id) {
-            cur->guiNode.setNewPos({(float)(50 + 200 * (idx - 1)), 50});
         }
     }
-    
-    if (found == head) {
-        head = head->next;
-    } else {
-        Node *prev = head;
-        while (prev->next != found) {
-            prev = prev->next;
-        }
-        prev->next = found->next;
-    }
-    delete found;
 }
 
 void SingleLL::removeAll() {
@@ -89,4 +74,29 @@ void SingleLL::removeAll() {
         remove(0);
     }
     size = 0;
+}
+
+void SingleLL::removeFromLL() {
+    Node* found = nullptr;
+    int idx = 0;
+    for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
+        if (cur->guiNode.getOpacity() <= 0.0005) {
+            found = cur;
+            break;
+        }
+    }
+
+    if (found != nullptr) {
+        if (found == head) {
+            head = head->next;
+        } else {
+            Node *prev = head;
+            while (prev->next != found) {
+                prev = prev->next;
+            }
+            prev->next = found->next;
+        }
+        delete found;
+        render();
+    }
 }

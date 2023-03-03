@@ -27,6 +27,7 @@ class SingleLL {
     void print();
     void remove(int id);
     void removeAll();
+    void removeFromLL();
 };
 
 #endif
