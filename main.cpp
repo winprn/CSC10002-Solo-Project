@@ -44,12 +44,6 @@ int main()
             ClearBackground(RAYWHITE);
             
             ll.render();
-            if (GuiButton({100, 200, 100, 50}, "Delete")) {
-                ll.remove(0);
-            }
-            if (GuiButton({250, 200, 100, 50}, "New List")) {
-                ll.getRandom();
-            }
             
         EndDrawing();
     }

@@ -24,7 +24,7 @@ class GuiNode {
 
     void render() {
         if (isOutdated) {
-            curOpacity -= 0.02;
+            curOpacity -= 0.03;
             
             if (fabs(curOpacity - newOpacity) <= 0.1) {
                 curOpacity = 0;
@@ -37,19 +37,19 @@ class GuiNode {
             curPos.x += dx / 30;
             curPos.y += dy / 30;
 
-            if (fabs(dx) <= 2 && fabs(dy) <= 2) {
+            if (fabs(dx) <= 0.5 && fabs(dy) <= 0.5) {
                 curPos = newPos;
                 isShifted = false;
             }
         }
 
-        Rectangle rect = {curPos.x, curPos.y, 100, 50};
-        DrawRectangleRoundedLines(rect, 10, 16, 2, Fade(BLACK, curOpacity));
+        Rectangle rect = {curPos.x, curPos.y, 80, 50};
+        DrawRectangleRoundedLines(rect, 0.1, 20, 2, Fade(BLACK, curOpacity));
         if (!isLast) {
-            DrawLine(curPos.x + 100, curPos.y + 25, curPos.x + 200, curPos.y + 25, Fade(BLACK, curOpacity));
-            DrawTriangleLines({curPos.x + 200, curPos.y + 25}, {curPos.x + 190, curPos.y + 15}, {curPos.x + 190, curPos.y + 35}, Fade(BLACK, curOpacity));
+            DrawLine(curPos.x + 80, curPos.y + 25, curPos.x + 130, curPos.y + 25, Fade(BLACK, curOpacity));
+            DrawTriangle({curPos.x + 130, curPos.y + 25}, {curPos.x + 120, curPos.y + 15}, {curPos.x + 120, curPos.y + 35}, Fade(BLACK, curOpacity));
         }
-        DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 20, 20, Fade(BLACK, curOpacity));
+        DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(BLACK, curOpacity));
     }
 
     void setVal(int nVal) {

@@ -1,5 +1,6 @@
 #include "SingleLL.h"
 #include "../../lib/raylib.h"
+#include "../../lib/raygui.h"
 #include "../components/GuiNode.h"
 
 #include <string>
@@ -18,7 +19,8 @@ int SingleLL::getHead() {
     return head->val;
 }
 
-void SingleLL::add(int val) {
+bool SingleLL::add(int val) {
+    if (getSize() >= 10) return false;
     Node* newNode = new Node;
     newNode->val = val;
     newNode->next = nullptr;
@@ -35,14 +37,43 @@ void SingleLL::add(int val) {
         tail = newNode;
         tail->guiNode.setIsLast(true);
     }
-    size++;
+    return true;
 }
 
 void SingleLL::render() {
     int idx = 0;
     removeFromLL();
+    // if (GuiButton({100, 200, 100, 50}, "Delete")) {
+    //     remove(0);
+    // }
+    // if (GuiButton({250, 200, 100, 50}, "New List")) {
+    //     getRandom();
+    // }
+    // if (GuiTextBox({100, 300, 100, 50}, input, 10, true) && strlen(input)) {
+    //     bool result = add(atoi(input));
+    //     if (!result) {
+    //         // CustomLog(LOG_DEBUG, "Cannot add more", 0);
+    //     } else {
+    //         // CustomLog(LOG_DEBUG, TextFormat("Added %d", atoi(s)), 0);
+    //     }
+    //     strcpy(input, "");
+    // }
+
+    switch (active)
+    {
+    case 0:
+        if (GuiButton({150, 200, 100, 50}, "Random")) {
+            getRandom();
+        }
+        break;
+    
+    default:
+        break;
+    }
+
+    active = GuiComboBox((Rectangle){150, 150, 80, 50}, options, active);
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-        cur->guiNode.setNewPos({(float)(50 + 200 * idx), 50});
+        cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
     }
 }
 
@@ -73,7 +104,6 @@ void SingleLL::removeAll() {
     while (head != nullptr) {
         remove(0);
     }
-    size = 0;
 }
 
 void SingleLL::removeFromLL() {

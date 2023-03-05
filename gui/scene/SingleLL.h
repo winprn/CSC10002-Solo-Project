@@ -15,13 +15,19 @@ class SingleLL {
     Node* head, *tail;
 
     public:
-    int size = 0;
+    char input[20]="";
+    const char* options = "ADD;DELETE;SEARCH";
+
+    int active = 0;
     SingleLL(): head(nullptr), tail(nullptr) {}
+    ~SingleLL() {
+        // delete active;
+    }
     
     int getSize();
     int getHead();
 
-    void add(int val);
+    bool add(int val);
     void render();
     void getRandom();
     void print();
