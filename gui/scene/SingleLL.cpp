@@ -2,6 +2,7 @@
 #include "../../lib/raylib.h"
 #include "../../lib/raygui.h"
 #include "../components/GuiNode.h"
+#include "../components/InputBox.h"
 
 #include <string>
 using namespace std;
@@ -73,16 +74,8 @@ void SingleLL::render() {
         if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
             remove(getSize() - 1);
         }
-        DrawText("Input index to delete", 500, 180, 20, BLACK);
-        if (GuiTextBox({500, 220, 150, 50}, input, 10, enableInput) && strlen(input)) {
-            int id = atoi(input);
-            remove(id);
-            strcpy(input, "");
-        }
-        if (IsMouseButtonDown(0)) {
-            if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {500, 220, 150, 50})) {
-                enableInput = true;
-            } else enableInput = false;
+        if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input, enableInput)) {
+            remove(input);
         }
         break;
     

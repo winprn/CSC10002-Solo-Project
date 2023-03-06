@@ -16,7 +16,7 @@ class SingleLL {
 
     public:
     bool enableInput = false;
-    char input[20]="";
+    int input;
     const char* options = "ADD;DELETE;SEARCH";
 
     int active = 0;
