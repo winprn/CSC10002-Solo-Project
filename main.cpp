@@ -37,6 +37,7 @@ int main()
     SetTargetFPS(60);
     SingleLL ll;
     ll.getRandom();
+    GuiLoadStyle("gui/styles.rgs");
     CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
     while (!WindowShouldClose())
     {

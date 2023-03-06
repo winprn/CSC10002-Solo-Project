@@ -62,8 +62,27 @@ void SingleLL::render() {
     switch (active)
     {
     case 0:
-        if (GuiButton({150, 200, 100, 50}, "Random")) {
+        if (GuiButton({150, 220, 100, 50}, "Random")) {
             getRandom();
+        }
+        break;
+    case 1:
+        if (GuiButton({100, 220, 150, 50}, "Delete head")) {
+            remove(0);
+        }
+        if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
+            remove(getSize() - 1);
+        }
+        DrawText("Input index to delete", 500, 180, 20, BLACK);
+        if (GuiTextBox({500, 220, 150, 50}, input, 10, enableInput) && strlen(input)) {
+            int id = atoi(input);
+            remove(id);
+            strcpy(input, "");
+        }
+        if (IsMouseButtonDown(0)) {
+            if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {500, 220, 150, 50})) {
+                enableInput = true;
+            } else enableInput = false;
         }
         break;
     
@@ -71,7 +90,7 @@ void SingleLL::render() {
         break;
     }
 
-    active = GuiComboBox((Rectangle){150, 150, 80, 50}, options, active);
+    active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
         cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
     }
@@ -123,6 +142,10 @@ void SingleLL::removeFromLL() {
             Node *prev = head;
             while (prev->next != found) {
                 prev = prev->next;
+            }
+            if (found == tail) {
+                tail = prev;
+                tail->guiNode.setIsLast(true);
             }
             prev->next = found->next;
         }
