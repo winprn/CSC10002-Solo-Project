@@ -7,7 +7,7 @@
 char input[20] = "";
 
 bool DrawInputBox(Rectangle rect, const char *title, int &value, bool &enableInput) {
-    DrawText(title, 500, 180, 20, BLACK);
+    DrawText(title, rect.x, rect.y - 20, 20, BLACK);
     bool hasChanged = false;
     if (GuiTextBox(rect, input, 10, enableInput) && strlen(input)) {
         int id = atoi(input);

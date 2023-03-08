@@ -3,6 +3,7 @@
 #include "../../lib/raygui.h"
 #include "../components/GuiNode.h"
 #include "../components/InputBox.h"
+#include "../../utils/Log.h"
 
 #include <string>
 using namespace std;
@@ -20,24 +21,33 @@ int SingleLL::getHead() {
     return head->val;
 }
 
-bool SingleLL::add(int val) {
+bool SingleLL::add(int val, int pos) {
     if (getSize() >= 10) return false;
-    Node* newNode = new Node;
+    if (pos) search();
+    Node *newNode = new Node;
     newNode->val = val;
     newNode->next = nullptr;
-    newNode->guiNode = GuiNode({(float)(0), 50});
+    newNode->guiNode = GuiNode({(float)(50 * pos), 80});
     newNode->guiNode.setVal(val);
 
-    if (head == nullptr) {
+    if (pos == 0) {
+        newNode->next = head;
         head = newNode;
-        tail = newNode;
-        head->guiNode.setIsLast(true);
+        if (getSize() == 1) head->guiNode.setIsLast(true);
     } else {
-        tail->next = newNode;
-        tail->guiNode.setIsLast(false);
-        tail = newNode;
-        tail->guiNode.setIsLast(true);
+        if (head == nullptr) {
+            head = newNode;
+            tail = newNode;
+            head->guiNode.setIsLast(true);
+        } else {
+            tail->next = newNode;
+            tail->guiNode.setIsLast(false);
+            tail = newNode;
+            tail->guiNode.setIsLast(true);
+            tail->guiNode.setNewOpacity(0);
+        }
     }
+    if (tail != nullptr) tail->guiNode.setIsLast(true);
     return true;
 }
 
@@ -63,8 +73,8 @@ void SingleLL::render() {
     switch (active)
     {
     case 0:
-        if (GuiButton({150, 220, 100, 50}, "Random")) {
-            getRandom();
+        if (DrawInputBox({150, 220, 100, 50}, "Add to first", input, enableInput)) {
+            add(input, 0);
         }
         break;
     case 1:
@@ -78,28 +88,51 @@ void SingleLL::render() {
             remove(input);
         }
         break;
+    case 2:
+        if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input, enableInput)) {
+            searchDone = false;
+            search(input);
+        }
+        break;
     
     default:
         break;
     }
+    if (GuiButton({0, 0, 150, 50}, "highlight head")) {
+        head->guiNode.setNewHighlight();
+        CustomLog(LOG_INFO, TextFormat("%d", head->guiNode.getIsDone()), 0);
+    }
 
     active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
+        if (cur->guiNode.getIsDone() && !animDone) {
+            if (cur->next != nullptr) {
+                if (cur->next->val == input) {
+                    cur->next->guiNode.setNewHighlight(2);
+                    animDone = true;
+                }else cur->next->guiNode.setNewHighlight();
+            } else {
+                animDone = true;
+            }
+            if (cur->val != input) {
+                cur->guiNode.setIsDone(false);
+            }
+        }
         cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
+    }
+
+    if (animDone) {
+        for (Node *cur = head; cur != nullptr; cur = cur->next) {
+            cur->guiNode.setNewOpacity(1);
+        }
     }
 }
 
 void SingleLL::getRandom() {
     // removeAll();
-    int n = max(1, rand() % 10);
+    int n = 1;
     for (int i = 0; i < n; i++) {
-        add(rand() % 20);
-    }
-}
-
-void SingleLL::print() {
-    for (Node *cur = head; cur != nullptr; cur = cur->next) {
-        printf("%d ", cur->val);
+        add(rand() % 20, 0);
     }
 }
 
@@ -108,6 +141,7 @@ void SingleLL::remove(int id) {
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
         if (idx == id) {
             cur->guiNode.setNewOpacity(0);
+            cur->guiNode.setIsRemove(true);
         }
     }
 }
@@ -122,7 +156,7 @@ void SingleLL::removeFromLL() {
     Node* found = nullptr;
     int idx = 0;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-        if (cur->guiNode.getOpacity() <= 0.0005) {
+        if (cur->guiNode.getIsRemove() && cur->guiNode.getOpacity() < 0.0005) {
             found = cur;
             break;
         }
@@ -145,4 +179,11 @@ void SingleLL::removeFromLL() {
         delete found;
         render();
     }
+}
+
+void SingleLL::search(int val) {
+    CustomLog(LOG_DEBUG, "inside search", 0);
+    if (head == nullptr) return ;
+    animDone = false;
+    head->guiNode.setNewHighlight();
 }

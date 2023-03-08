@@ -8,14 +8,14 @@
 class SingleLL {
     struct Node {
         int val;
-        Node* next;
+        Node* next = nullptr;
         GuiNode guiNode;
     };
 
-    Node* head, *tail;
+    Node *head, *tail;
 
     public:
-    bool enableInput = false;
+    bool enableInput = false, searchDone = true, animDone = true, isAdding = false;
     int input;
     const char* options = "ADD;DELETE;SEARCH";
 
@@ -28,13 +28,14 @@ class SingleLL {
     int getSize();
     int getHead();
 
-    bool add(int val);
+    bool add(int val, int pos);
+    void addToLL(int val);
     void render();
     void getRandom();
-    void print();
     void remove(int id);
     void removeAll();
     void removeFromLL();
+    void search(int val = -1);
 };
 
 #endif
