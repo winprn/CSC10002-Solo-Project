@@ -15,7 +15,7 @@ class SingleLL {
     Node *head, *tail;
 
     public:
-    bool enableInput = false, searchDone = true, animDone = true, isAdding = false;
+    bool enableInput = false, enableInput2 = false, searchDone = true, animDone = true, isAdding = false;
     int input;
     const char* options = "ADD;DELETE;SEARCH";
 

@@ -1,35 +1,33 @@
-#include <bits/stdc++.h>
-#include "lib/raylib.h"
-#include "lib/raygui.h"
 #include "Function.h"
 #include "gui/components/GuiNode.h"
 #include "gui/scene/SingleLL.h"
+#include "lib/raygui.h"
+#include "lib/raylib.h"
 #include "utils/Log.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
-int main()
-{
-    SetTraceLogCallback(CustomLog);
-    InitWindow(1280, 720, "testss");
-    
-    SetTargetFPS(60);
-    SingleLL ll;
-    // ll.getRandom();
-    ll.add(10, 0);
-    GuiLoadStyle("gui/styles.rgs");
-    CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            
-            ll.render();
-            
-        EndDrawing();
-    }
+int main() {
+  SetTraceLogCallback(CustomLog);
+  InitWindow(1280, 720, "testss");
 
-    CloseWindow();
+  SetTargetFPS(60);
+  SingleLL ll;
+  // ll.getRandom();
+  ll.add(10, 0);
+  GuiLoadStyle("gui/styles.rgs");
+  CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
+  while (!WindowShouldClose()) {
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
 
-    return 0;
+    ll.render();
+
+    EndDrawing();
+  }
+
+  CloseWindow();
+
+  return 0;
 }
