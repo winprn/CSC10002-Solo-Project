@@ -4,16 +4,15 @@
 #include "../../lib/raylib.h"
 #include "../../lib/raygui.h"
 #include <string>
-char input[20] = "";
 
-bool DrawInputBox(Rectangle rect, const char *title, int &value, bool &enableInput) {
+bool DrawInputBox(Rectangle rect, const char *title, char *input, int &value, bool &enableInput) {
     DrawText(title, rect.x, rect.y - 20, 20, BLACK);
     bool hasChanged = false;
     if (GuiTextBox(rect, input, 10, enableInput) && strlen(input)) {
         int id = atoi(input);
         value = id;
         hasChanged = true;
-        strcpy(input, "");
+        // strcpy(input, "");
     }
     if (IsMouseButtonDown(0)) {
         if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, rect)) {

@@ -8,63 +8,6 @@
 #include <string>
 using namespace std;
 
-int SingleLL::getSize() {
-  int sz = 0;
-  for (Node* cur = head; cur != nullptr; cur = cur->next) {
-    sz++;
-  }
-  return sz;
-}
-
-int SingleLL::getHead() {
-  if (head == nullptr)
-    return 123;
-  return head->val;
-}
-
-bool SingleLL::add(int val, int pos) {
-  if (getSize() >= 10)
-    return false;
-  if (pos)
-    search();
-  Node* newNode = new Node;
-  newNode->val = val;
-  newNode->next = nullptr;
-  newNode->guiNode = GuiNode({(float)(50 * pos), 80});
-  newNode->guiNode.setVal(val);
-
-  if (pos == 0) {
-    newNode->next = head;
-    head = newNode;
-    if (getSize() == 1)
-      head->guiNode.setIsLast(true);
-  } else if (pos == getSize()) {
-    if (head == nullptr) {
-      head = newNode;
-      tail = newNode;
-      head->guiNode.setIsLast(true);
-    } else {
-      tail->next = newNode;
-      tail->guiNode.setIsLast(false);
-      tail = newNode;
-      tail->guiNode.setIsLast(true);
-      tail->guiNode.setNewOpacity(0);
-    }
-  } else {
-    int idx = 0;
-    for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
-      if (idx + 1 == pos) {
-        newNode->next = cur->next;
-        cur->next = newNode;
-        break;
-      }
-    }
-  }
-  if (tail != nullptr)
-    tail->guiNode.setIsLast(true);
-  return true;
-}
-
 void SingleLL::render() {
   int idx = 0;
   removeFromLL();
@@ -86,13 +29,23 @@ void SingleLL::render() {
 
   switch (active) {
     case 0:
-      if (DrawInputBox({150, 220, 100, 50}, "Add to first", input,
-                       enableInput)) {
-        add(input, 0);
-      }
-      if (DrawInputBox({300, 220, 100, 50}, "Add to last", input,
-                       enableInput2)) {
-        add(input, getSize());
+      DrawInputBox({150, 220, 100, 50}, "Add to first", input[0], value[0],
+                       enableInput[0]);
+      DrawInputBox({300, 220, 100, 50}, "Add to last", input[1], value[1],
+                       enableInput[1]);
+      DrawInputBox({450, 220, 100, 50}, "Value", input[2], value[2],
+                       enableInput[2]);
+      DrawInputBox({600, 220, 100, 50}, "Index", input[3], value[3], enableInput[3]);
+        
+      if (GuiButton({150, 300, 100, 50}, "Add")) {
+        if (value[0]) add(value[0], 0);
+        else if (value[1]) add(value[1], getSize());
+        else if (value[2] && value[3]) add(value[2], value[3]);
+        strcpy(input[0], "");
+        strcpy(input[1], "");
+        strcpy(input[2], "");
+        strcpy(input[3], "");
+        value[0] = value[1] = value[2] = value[3] = 0;
       }
       break;
     case 1:
@@ -102,16 +55,16 @@ void SingleLL::render() {
       if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
         remove(getSize() - 1);
       }
-      if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input,
-                       enableInput)) {
-        remove(input);
+      if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input[0], value[0],
+                       enableInput[0])) {
+        remove(value[0]);
       }
       break;
     case 2:
-      if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input,
-                       enableInput)) {
+      if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input[0], value[0],
+                       enableInput[0])) {
         searchDone = false;
-        search(input);
+        search(value[0]);
       }
       break;
 
@@ -127,7 +80,7 @@ void SingleLL::render() {
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (cur->guiNode.getIsDone() && !animDone) {
       if (cur->next != nullptr) {
-        if (cur->next->val == input) {
+        if (cur->next->val == value[0]) {
           cur->next->guiNode.setNewHighlight(2);
           animDone = true;
         } else
@@ -135,7 +88,7 @@ void SingleLL::render() {
       } else {
         animDone = true;
       }
-      if (cur->val != input) {
+      if (cur->val != value[0]) {
         cur->guiNode.setIsDone(false);
       }
     }
@@ -147,6 +100,70 @@ void SingleLL::render() {
       cur->guiNode.setNewOpacity(1);
     }
   }
+}
+
+int SingleLL::getSize() {
+  int sz = 0;
+  for (Node* cur = head; cur != nullptr; cur = cur->next) {
+    sz++;
+  }
+  return sz;
+}
+
+int SingleLL::getHead() {
+  if (head == nullptr)
+    return 123;
+  return head->val;
+}
+
+bool SingleLL::add(int val, int pos) {
+  if (getSize() >= 10)
+    return false;
+  // if (pos)
+  //   // search();
+  CustomLog(LOG_DEBUG, TextFormat("%d", pos), 0);
+  Node* newNode = new Node;
+  newNode->val = val;
+  newNode->next = nullptr;
+  newNode->guiNode = GuiNode({(float)(50 + 130 * pos), 100});
+  newNode->guiNode.setVal(val);
+
+  if (pos == 0) {
+    newNode->next = head;
+    head = newNode;
+    if (getSize() == 1) {
+      head->guiNode.setIsLast(true);
+      tail = newNode;
+    }
+  } else if (pos == getSize()) {
+    if (head == nullptr) {
+      head = newNode;
+      tail = newNode;
+      head->guiNode.setIsLast(true);
+    } else {
+      if (tail == nullptr) {
+        // CustomLog(LOG_ERROR, "hihihi", 0);
+      } else {
+        tail->next = newNode;
+        tail->guiNode.setIsLast(false);
+        tail = newNode;
+        tail->guiNode.setIsLast(true);
+        tail->guiNode.setNewOpacity(0);
+      }
+    }
+  } else {
+    int idx = 0;
+    for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
+      if (idx + 1 == pos) {
+        newNode->next = cur->next;
+        cur->next = newNode;
+        break;
+      }
+    }
+  }
+  if (tail != nullptr)
+    tail->guiNode.setIsLast(true);
+  return true;
 }
 
 void SingleLL::getRandom() {
