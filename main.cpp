@@ -15,14 +15,21 @@ int main() {
   SetTargetFPS(60);
   SingleLL ll;
   // ll.getRandom();
-  ll.add(10, 0);
+  ll.add(10, 1);
   GuiLoadStyle("gui/styles.rgs");
   CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
+  // float angle = 30;
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
     ll.render();
+    // Vector2 curPos{50, 500};
+    // DrawTriangle({curPos.x + 130, curPos.y + 25}, {curPos.x + 120 + 20 * cos(PI/4) * tan(angle * PI / 180), curPos.y + 15}, {curPos.x + 120, curPos.y + 35 - 20 * cos(PI/4) * tan(angle * PI / 180)}, Fade(BLACK, 1.0));
+    // angle -= 0.5;
+    // if (angle < 0) {
+    //   angle = 0;
+    // }
 
     EndDrawing();
   }

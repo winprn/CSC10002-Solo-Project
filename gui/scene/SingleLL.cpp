@@ -37,10 +37,19 @@ void SingleLL::render() {
                        enableInput[2]);
       DrawInputBox({600, 220, 100, 50}, "Index", input[3], value[3], enableInput[3]);
         
-      if (GuiButton({150, 300, 100, 50}, "Add")) {
-        if (value[0]) add(value[0], 0);
-        else if (value[1]) add(value[1], getSize());
-        else if (value[2] && value[3]) add(value[2], value[3]);
+      if (GuiButton({150, 300, 100, 50}, "Add") || GetKeyPressed() == KEY_ENTER) {
+        if (value[0]) {
+          index = 1;
+          add(value[0], 1);
+        }
+        else if (value[1]) {
+          index = getSize() + 1;
+          add(value[1], getSize() + 1);
+        }
+        else if (value[2] && value[3]) {
+          index = value[3];
+          add(value[2], value[3]);
+        }
         strcpy(input[0], "");
         strcpy(input[1], "");
         strcpy(input[2], "");
@@ -50,14 +59,19 @@ void SingleLL::render() {
       break;
     case 1:
       if (GuiButton({100, 220, 150, 50}, "Delete head")) {
-        remove(0);
+        remove(1);
+        isDeleting = true;
       }
       if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
-        remove(getSize() - 1);
+        remove(getSize());
+        isDeleting = true;
       }
       if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input[0], value[0],
                        enableInput[0])) {
         remove(value[0]);
+        isDeleting = true;
+        strcpy(input[0], "");
+        value[0] = 0;
       }
       break;
     case 2:
@@ -65,39 +79,56 @@ void SingleLL::render() {
                        enableInput[0])) {
         searchDone = false;
         search(value[0]);
+        strcpy(input[0], "");
       }
       break;
 
     default:
       break;
   }
-  if (GuiButton({0, 0, 150, 50}, "highlight head")) {
-    head->guiNode.setNewHighlight();
-    CustomLog(LOG_INFO, TextFormat("%d", head->guiNode.getIsDone()), 0);
+  if (GuiButton({0, 0, 150, 50}, "play animation")) {
+    animate();
+  }
+  if (GuiButton({200, 0, 150, 50}, "rotate arrow")) {
+    head->guiNode.setIsRotateArrow(true);
   }
 
   active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
+  idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
-    if (cur->guiNode.getIsDone() && !animDone) {
-      if (cur->next != nullptr) {
-        if (cur->next->val == value[0]) {
-          cur->next->guiNode.setNewHighlight(2);
-          animDone = true;
-        } else
-          cur->next->guiNode.setNewHighlight();
-      } else {
-        animDone = true;
-      }
-      if (cur->val != value[0]) {
-        cur->guiNode.setIsDone(false);
+    if (!animDone) {
+      if (cur->guiNode.getIsDone()) {
+        if (cur->next && !cur->next->guiNode.getHighlight() && !cur->next->guiNode.getIsDone()) {
+          if (cur->next->val == value[0] || idx + 1 == index) {
+            cur->next->guiNode.setNewHighlight(3);
+            animDone = true;
+          } else cur->next->guiNode.setNewHighlight(1);
+        } else if (!cur->next && cur->guiNode.getIsDone()) animDone = true;
       }
     }
-    cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
+    // if (cur->next != nullptr && cur->guiNode.getIsLast() && fabs(cur->next->guiNode.getCurPos().y - cur->guiNode.getCurPos().y) < 5) {
+    //   cur->guiNode.setIsLast(false);
+    // }
+    if (idx != index || index == 1) {
+      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
+    } else {
+      if (idx > 1 && idx <= getSize() - 1) cur->guiNode.setNewPos({(float)(50 + 130 * (idx)), 120});
+      else cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
+    }
   }
 
   if (animDone) {
+    idx = 1;
+    for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
+      if (idx + 1 == index) {
+        cur->guiNode.setIsLast(false);
+        cur->guiNode.setIsRotateArrow(true);
+        if (!cur->guiNode.getIsLengthChanged()) index = -1;
+      }
+    }
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
-      cur->guiNode.setNewOpacity(1);
+      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewOpacity(1);
+      cur->guiNode.setIsDone(false);
     }
   }
 }
@@ -121,21 +152,24 @@ bool SingleLL::add(int val, int pos) {
     return false;
   // if (pos)
   //   // search();
-  CustomLog(LOG_DEBUG, TextFormat("%d", pos), 0);
+  if (pos > 1) animate();
+  CustomLog(LOG_DEBUG, TextFormat("pos = %d, getSize() = %d", pos, getSize()), 0);
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  newNode->guiNode = GuiNode({(float)(50 + 130 * pos), 100});
+  if (pos > 1 && pos <= getSize()) newNode->guiNode = GuiNode({(float)(50 + 130 * (pos)), 120});
+  else newNode->guiNode = GuiNode({(float)(50 + 130 * pos), 120});
   newNode->guiNode.setVal(val);
+  newNode->guiNode.setNewOpacity(1);
 
-  if (pos == 0) {
+  if (pos == 1) {
     newNode->next = head;
     head = newNode;
     if (getSize() == 1) {
       head->guiNode.setIsLast(true);
       tail = newNode;
     }
-  } else if (pos == getSize()) {
+  } else if (pos > getSize()) {
     if (head == nullptr) {
       head = newNode;
       tail = newNode;
@@ -145,16 +179,16 @@ bool SingleLL::add(int val, int pos) {
         // CustomLog(LOG_ERROR, "hihihi", 0);
       } else {
         tail->next = newNode;
-        tail->guiNode.setIsLast(false);
+        // tail->guiNode.setIsRotateArrow(true);
         tail = newNode;
         tail->guiNode.setIsLast(true);
-        tail->guiNode.setNewOpacity(0);
       }
     }
   } else {
-    int idx = 0;
+    int idx = 1;
     for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
       if (idx + 1 == pos) {
+        // cur->guiNode.setIsRotateArrow(true);
         newNode->next = cur->next;
         cur->next = newNode;
         break;
@@ -175,9 +209,10 @@ void SingleLL::getRandom() {
 }
 
 void SingleLL::remove(int id) {
-  int idx = 0;
+  int idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
+      cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
     }
@@ -219,10 +254,15 @@ void SingleLL::removeFromLL() {
   }
 }
 
+void SingleLL::animate() {
+  head->guiNode.setNewHighlight(1);
+  animDone = false;
+}
+
 void SingleLL::search(int val) {
   CustomLog(LOG_DEBUG, "inside search", 0);
   if (head == nullptr)
     return;
-  animDone = false;
   head->guiNode.setNewHighlight();
+  animDone = false;
 }
