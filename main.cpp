@@ -9,8 +9,31 @@
 
 using namespace std;
 
+Font font;
+
+bool drawRectangleMenu(Rectangle rect, char *text) {
+  Image img = LoadImage("images/sll_menu.png");
+  // read image from file and draw it
+  DrawRectangleRounded(rect, 0.05, 20, Color({233, 236, 239, 255}));
+  Texture2D texture = LoadTextureFromImage(img);
+  DrawTexture(texture, rect.x, rect.y, WHITE);
+
+  DrawTextEx(font, text, {rect.x + 84, rect.y + 164}, 20, 1, Color({0, 0, 0, 255}));
+  // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255})); 
+  if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect)) return true;
+
+  return false;
+}
+
 void drawMenu(int &screen) {
-  if (GuiButton({100, 100, 100, 50}, "Single Linked List")) {
+  DrawText("Welcome to VisuAlgo - cloned by @winprn", 266, 32, 40, Color({233, 236, 239, 255}));
+  if (drawRectangleMenu({56, 122, 330, 200}, "Singly Linked List")) {
+    screen = 1;
+  }
+  if (drawRectangleMenu({475, 122, 330, 200}, "Singly Linked List")) {
+    screen = 1;
+  }
+  if (drawRectangleMenu({895, 122, 330, 200}, "Singly Linked List")) {
     screen = 1;
   }
 }
@@ -28,10 +51,11 @@ int main() {
   bool ok = 0;
   CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
   // float angle = 30;
+  font = LoadFont("gui/Roboto-Regular.ttf");
   int screen = 0;
   while (!WindowShouldClose()) {
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(Color({52, 58, 64, 255}));
 
     switch (screen) {
       case 0:
