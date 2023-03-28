@@ -3,13 +3,15 @@
 
 #include "../../lib/raylib.h"
 #include "../../utils/Log.h"
+#include "Arrow.h"
 #include <cmath>
 
 class GuiNode {
     int val, highlight;
     Vector2 curPos, newPos;
     float curOpacity = 1.0, newOpacity, progress = 0, curLength = 0, lineLength = 0, angle;
-    bool isLast = false, isOutdated = false, isShifted = false, isHighlighted = false, isDone = false, isRemove = false, isLengthChanged = false, isRotateArrow = false;
+    bool isLast = false, isOutdated = false, isShifted = false, isHighlighted = false, isDone = false, isRemove = false, isLengthChanged = false, isHead = false;
+    Arrow arr;
 
     public:
     GuiNode() {}
@@ -51,6 +53,10 @@ class GuiNode {
         return isLengthChanged;
     }
 
+    Vector2 getArrow() {
+        return arr.start;
+    }
+
     void render(bool isHighlight = 0) {
         if (isOutdated) {
             if (newOpacity > 0) curOpacity += 0.03;
@@ -66,6 +72,7 @@ class GuiNode {
             double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
             curPos.x += dx / 30;
             curPos.y += dy / 30;
+            arr.start = {curPos.x + 80, curPos.y + 25};
 
             if (fabs(dx) <= 0.05 && fabs(dy) <= 0.05) {
                 curPos = newPos;
@@ -74,9 +81,13 @@ class GuiNode {
         }
 
         Rectangle rect = {curPos.x, curPos.y, 80, 50};
+        if (isHead) {
+            DrawText("Head", curPos.x + 20, curPos.y - 20, 20, Fade(BLACK, curOpacity));
+        }
         if (isHighlighted) {
             DrawRectangleRounded(rect, 0.1, 20, Fade(BLACK, curOpacity));
             DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(WHITE, curOpacity));
+            DrawText("cur", curPos.x + 20, curPos.y + 66, 20, Fade(BLACK, curOpacity));
             progress += 0.032;
             CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
             if (progress > highlight) {
@@ -89,30 +100,7 @@ class GuiNode {
             DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(GREEN, curOpacity));
         }
         if (!isLast) {
-            if (isRotateArrow) {
-                DrawLine(curPos.x + 80, curPos.y + 25, curPos.x + 80 + curLength, curPos.y + 25 + 80 * tan(angle * PI / 180), Fade(BLACK, curOpacity));
-                DrawTriangle({curPos.x + 80 + curLength, curPos.y + 25 + 80 * tan(angle * PI / 180)}, {curPos.x + 70 + curLength + 20 * cos(PI/4) * tan(angle * PI / 180), curPos.y + 15 + 80 * tan(angle * PI / 180)}, {curPos.x + 70 + curLength, curPos.y + 35 - 20 * cos(PI/4) * tan(angle * PI / 180) + 80 * tan(angle * PI / 180)}, Fade(BLACK, 1.0));
-                if (curLength == lineLength) {
-                    isLengthChanged = false;
-                    angle -= 0.5;
-                    if (angle < 0) {
-                        angle = 0;
-                        isRotateArrow = false;
-                    }
-                } else curLength++;
-            } else {
-                DrawLine(curPos.x + 80, curPos.y + 25, curPos.x + 130, curPos.y + 25, Fade(BLACK, curOpacity));
-                DrawTriangle({curPos.x + 130, curPos.y + 25}, {curPos.x + 120, curPos.y + 15}, {curPos.x + 120, curPos.y + 35}, Fade(BLACK, curOpacity));
-            }
-        }
-        
-        if (isLast && isLengthChanged) {
-            DrawLine(curPos.x + 80, curPos.y + 25, curPos.x + 80 + curLength, curPos.y + 25, Fade(BLACK, curOpacity));
-            DrawTriangle({curPos.x + 80 + curLength, curPos.y + 25}, {curPos.x + 70 + curLength, curPos.y + 15}, {curPos.x + 70 + curLength, curPos.y + 35}, Fade(BLACK, curOpacity));
-            curLength--;
-            if (curLength == lineLength) {
-                isLengthChanged = false;
-            }
+            arr.render();
         }
     }
 
@@ -122,10 +110,6 @@ class GuiNode {
 
     void setIsLast(bool isLast) {
         this->isLast = isLast;
-        if (!isLast) {
-            lineLength = 50;
-        } else lineLength = 0;
-        isLengthChanged = fabs(curLength - lineLength) > 1;
         // render();
     }
 
@@ -134,19 +118,21 @@ class GuiNode {
         highlight = h;
         isHighlighted = true;
         isDone = false;
-        render();
+        // render();
     }
 
     void setNewOpacity(float opacity) {
         newOpacity = opacity;
         isOutdated = true;
-        render();
+        // render();
     }
 
     void setNewPos(Vector2 pos) {
         newPos = pos;
-        isShifted = true;
-        render();
+        if (fabs(curPos.x - newPos.x) > 0.05 || fabs(curPos.y - newPos.y) > 0.05) {
+            isShifted = true;
+        } else isShifted = false;
+        // render();
     }
 
     void setIsDone(bool isDone) {
@@ -161,10 +147,13 @@ class GuiNode {
         this->angle = angle;
     }
 
-    void setIsRotateArrow(bool isRotate) {
-        isRotateArrow = isRotate;
-        angle = 30;
-        render();
+    void setArrow(Vector2 s, Vector2 e) {
+        arr = Arrow(s, e);
+        // render();
+    }
+
+    void setIsHead(bool isHead) {
+        this->isHead = isHead;
     }
 };
 

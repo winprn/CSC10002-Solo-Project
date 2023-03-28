@@ -89,41 +89,51 @@ void SingleLL::render() {
   if (GuiButton({0, 0, 150, 50}, "play animation")) {
     animate();
   }
-  if (GuiButton({200, 0, 150, 50}, "rotate arrow")) {
-    head->guiNode.setIsRotateArrow(true);
-  }
 
   active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
   idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
+    if (cur != head) cur->guiNode.setIsHead(false);
+    cur->guiNode.render();
+    if (cur->guiNode.getIsRemove()) continue;
+    if (!cur->guiNode.getIsLast()) {
+      cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+    }
     if (!animDone) {
       if (cur->guiNode.getIsDone()) {
         if (cur->next && !cur->next->guiNode.getHighlight() && !cur->next->guiNode.getIsDone()) {
           if (cur->next->val == value[0] || idx + 1 == index) {
             cur->next->guiNode.setNewHighlight(3);
             animDone = true;
-          } else cur->next->guiNode.setNewHighlight(1);
+          } else if (idx + 1 < index) cur->next->guiNode.setNewHighlight(1);
         } else if (!cur->next && cur->guiNode.getIsDone()) animDone = true;
       }
+      CustomLog(LOG_DEBUG, TextFormat("idx: %d, index: %d, isDone: %d", idx, index, head->guiNode.getIsDone()), 0);
+      if (index == 1 && head->next->guiNode.getIsDone()) animDone = true;
     }
     // if (cur->next != nullptr && cur->guiNode.getIsLast() && fabs(cur->next->guiNode.getCurPos().y - cur->guiNode.getCurPos().y) < 5) {
     //   cur->guiNode.setIsLast(false);
     // }
-    if (idx != index || index == 1) {
+    if (idx != index) {
       if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
-    } else {
-      if (idx > 1 && idx <= getSize() - 1) cur->guiNode.setNewPos({(float)(50 + 130 * (idx)), 120});
-      else cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
+    } else if (!cur->guiNode.getIsRemove()) {
+      cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
     }
   }
 
   if (animDone) {
     idx = 1;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-      if (idx + 1 == index) {
+      if (cur->guiNode.getIsRemove()) continue;
+      if (idx + 1 == index && cur->next) {
         cur->guiNode.setIsLast(false);
-        cur->guiNode.setIsRotateArrow(true);
-        if (!cur->guiNode.getIsLengthChanged()) index = -1;
+        cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+      } else if (idx == index || index == 1) {
+        if (cur->next) {
+          cur->guiNode.setIsLast(false);
+          cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+        }
+        index = -1;
       }
     }
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
@@ -152,7 +162,9 @@ bool SingleLL::add(int val, int pos) {
     return false;
   // if (pos)
   //   // search();
-  if (pos > 1) animate();
+  if (head) {
+    animate();
+  }
   CustomLog(LOG_DEBUG, TextFormat("pos = %d, getSize() = %d", pos, getSize()), 0);
   Node* newNode = new Node;
   newNode->val = val;
@@ -161,6 +173,7 @@ bool SingleLL::add(int val, int pos) {
   else newNode->guiNode = GuiNode({(float)(50 + 130 * pos), 120});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
+  newNode->guiNode.setIsLast(true);
 
   if (pos == 1) {
     newNode->next = head;
@@ -169,6 +182,7 @@ bool SingleLL::add(int val, int pos) {
       head->guiNode.setIsLast(true);
       tail = newNode;
     }
+    // CustomLog(LOG_ERROR, TextFormat("head is last: %d", head->guiNode.getIsLast()), 0);
   } else if (pos > getSize()) {
     if (head == nullptr) {
       head = newNode;
@@ -189,11 +203,17 @@ bool SingleLL::add(int val, int pos) {
     for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
       if (idx + 1 == pos) {
         // cur->guiNode.setIsRotateArrow(true);
+        cur->guiNode.setIsLast(true);
+        cur->guiNode.setArrow({0, 0}, {0, 0});
         newNode->next = cur->next;
         cur->next = newNode;
         break;
       }
     }
+    // newNode->guiNode.setArrow({newNode->guiNode.getCurPos().x + 80, newNode->guiNode.getCurPos().y + 25}, {newNode->next->guiNode.getCurPos().x, newNode->next->guiNode.getCurPos().y + 25});
+  }
+  if (head) {
+    head->guiNode.setIsHead(true);
   }
   if (tail != nullptr)
     tail->guiNode.setIsLast(true);
@@ -212,6 +232,7 @@ void SingleLL::remove(int id) {
   int idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
+      // CustomLog(LOG_DEBUG, "found == tail", 0);
       cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
@@ -244,13 +265,16 @@ void SingleLL::removeFromLL() {
         prev = prev->next;
       }
       if (found == tail) {
+        CustomLog(LOG_DEBUG, "found == tail", 0);
+        CustomLog(LOG_DEBUG, TextFormat("%d", prev->val), 0);
         tail = prev;
         tail->guiNode.setIsLast(true);
+        tail->guiNode.setArrow({0, 0}, {0, 0});
       }
       prev->next = found->next;
     }
     delete found;
-    render();
+    // render();
   }
 }
 
