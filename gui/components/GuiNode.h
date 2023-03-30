@@ -72,7 +72,7 @@ class GuiNode {
             double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
             curPos.x += dx / 30;
             curPos.y += dy / 30;
-            arr.start = {curPos.x + 80, curPos.y + 25};
+            arr.start = {curPos.x + 60, curPos.y + 25};
 
             if (fabs(dx) <= 0.05 && fabs(dy) <= 0.05) {
                 curPos = newPos;
@@ -80,12 +80,13 @@ class GuiNode {
             }
         }
 
-        Rectangle rect = {curPos.x, curPos.y, 80, 50};
+        Rectangle rect = {curPos.x, curPos.y, 70, 50};
         if (isHead) {
             DrawText("Head", curPos.x + 20, curPos.y - 20, 20, Fade(BLACK, curOpacity));
         }
         if (isHighlighted) {
-            DrawRectangleRounded(rect, 0.1, 20, Fade(BLACK, curOpacity));
+            DrawRectangleRounded(rect, 0.15, 20, Fade(BLACK, curOpacity));
+            DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2, Fade(WHITE, curOpacity));
             DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(WHITE, curOpacity));
             DrawText("cur", curPos.x + 20, curPos.y + 66, 20, Fade(BLACK, curOpacity));
             progress += 0.032;
@@ -96,8 +97,9 @@ class GuiNode {
                 progress = 0;
             }
         } else {
-            DrawRectangleRoundedLines(rect, 0.1, 20, 2, Fade(BLACK, curOpacity));
-            DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(GREEN, curOpacity));
+            DrawRectangleRounded(rect, 0.15, 20, Color({217, 217, 217, (unsigned char)(curOpacity * 255)}));
+            DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2, Fade(BLACK, curOpacity));
+            DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(BLACK, curOpacity));
         }
         if (!isLast) {
             arr.render();

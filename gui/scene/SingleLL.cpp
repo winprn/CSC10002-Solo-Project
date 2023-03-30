@@ -1,103 +1,161 @@
 #include "SingleLL.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
+#include "../../lib/gui_file_dialog.h"
 #include "../../utils/Log.h"
+#include "../../utils/Settings.h"
 #include "../components/GuiNode.h"
 #include "../components/InputBox.h"
 
 #include <string>
 using namespace std;
+using namespace Settings;
 
 void SingleLL::render() {
+  ClearBackground(RAYWHITE);
   int idx = 0;
+  // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  // if (GuiButton({100, 200, 100, 50}, "Delete")) {
-  //     remove(0);
-  // }
-  // if (GuiButton({250, 200, 100, 50}, "New List")) {
-  //     getRandom();
-  // }
-  // if (GuiTextBox({100, 300, 100, 50}, input, 10, true) && strlen(input)) {
-  //     bool result = add(atoi(input));
-  //     if (!result) {
-  //         // CustomLog(LOG_DEBUG, "Cannot add more", 0);
-  //     } else {
-  //         // CustomLog(LOG_DEBUG, TextFormat("Added %d", atoi(s)), 0);
+  DrawTextEx(font, "Singly Linked List", {501, 31}, 40, 1, BLACK);
+
+  if (GuiButton({100, 415, 100, 40}, "Create")) {
+    reset();
+    showCreateButtons = true;
+  }
+  if (GuiButton({100, 475, 100, 40}, "Add")) {
+    reset();
+    showAddButtons = true;
+  }
+  if (GuiButton({100, 535, 100, 40}, "Delete")) {
+    reset();
+    showDeleteButtons = true;
+  }
+  if (GuiButton({100, 595, 100, 40}, "Search")) {
+    reset();
+    showSearchButtons = true;
+  }
+  if (GuiButton({100, 655, 100, 40}, "Update")) {
+    reset();
+    showUpdateButtons = true;
+  }
+
+  if (showCreateButtons) {
+    if (GuiButton({280, 415, 100, 40}, "Random")) {
+      createRandomList();
+    }
+    if (GuiButton({400, 415, 100, 40}, "From file")) {
+      fileDialogState.windowActive = true;
+    }
+    if (fileDialogState.windowActive) GuiLock();
+    GuiUnlock();
+    if (fileDialogState.SelectFilePressed)
+    {
+      if (IsFileExtension(fileDialogState.fileNameText, ".txt"))
+      {
+        strcpy(filePath, fileDialogState.fileNameText);
+        CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
+        addFromFile();
+      }
+      fileDialogState.SelectFilePressed = false;
+    }
+    GuiFileDialog(&fileDialogState);
+  }
+  if (showAddButtons) {
+    if (GuiButton({280, 475, 100, 40}, "Add to head")) {
+      showInputBox = true;
+    }
+    if (showInputBox) {
+      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0], enableInput[0], ICON_PLUS)) {
+        index = 1;
+        add(value[0], 1);
+        showInputBox = false;
+        strcpy(input[0], "");
+      }
+    }
+    if (GuiButton({400, 475, 100, 40}, "Add to tail"));
+    if (GuiButton({520, 475, 100, 40}, "Add to index"));
+  }
+  if (showDeleteButtons) {
+    if (GuiButton({280, 535, 100, 40}, "Delete head"));
+    if (GuiButton({400, 535, 100, 40}, "Delete tail"));
+    if (GuiButton({520, 535, 100, 40}, "Delete at index"));
+  }
+  if (showSearchButtons) {
+    if(DrawInputBox({280, 535, 100, 40}, "", input[0], value[0], enableInput[0], ICON_LENS));
+  }
+  if (showUpdateButtons) {
+    if(DrawInputBox({280, 535, 100, 40}, "", input[0], value[0], enableInput[0], ICON_REPEAT_FILL));
+  }
+
+  // switch (active) {
+  //   case 0:
+  //     DrawInputBox({150, 220, 100, 50}, "Add to first", input[0], value[0],
+  //                      enableInput[0]);
+  //     DrawInputBox({300, 220, 100, 50}, "Add to last", input[1], value[1],
+  //                      enableInput[1]);
+  //     DrawInputBox({450, 220, 100, 50}, "Value", input[2], value[2],
+  //                      enableInput[2]);
+  //     DrawInputBox({600, 220, 100, 50}, "Index", input[3], value[3], enableInput[3]);
+
+  //     // GuiSetStyle(DEFAULT, TEXT_SIZE, 20);  
+  //     if (GuiButton({150, 300, 100, 50}, "Add") || GetKeyPressed() == KEY_ENTER) {
+  //       if (value[0]) {
+  //         index = 1;
+  //         add(value[0], 1);
+  //       }
+  //       else if (value[1]) {
+  //         index = getSize() + 1;
+  //         add(value[1], getSize() + 1);
+  //       }
+  //       else if (value[2] && value[3]) {
+  //         index = value[3];
+  //         add(value[2], value[3]);
+  //       }
+  //       strcpy(input[0], "");
+  //       strcpy(input[1], "");
+  //       strcpy(input[2], "");
+  //       strcpy(input[3], "");
+  //       value[0] = value[1] = value[2] = value[3] = 0;
   //     }
-  //     strcpy(input, "");
+  //     break;
+  //   case 1:
+  //     if (GuiButton({100, 220, 150, 50}, "Delete head")) {
+  //       remove(1);
+  //       isDeleting = true;
+  //     }
+  //     if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
+  //       remove(getSize());
+  //       isDeleting = true;
+  //     }
+  //     if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input[0], value[0],
+  //                      enableInput[0])) {
+  //       remove(value[0]);
+  //       isDeleting = true;
+  //       strcpy(input[0], "");
+  //       value[0] = 0;
+  //     }
+  //     break;
+  //   case 2:
+  //     if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input[0], value[0],
+  //                      enableInput[0])) {
+  //       searchDone = false;
+  //       search(value[0]);
+  //       strcpy(input[0], "");
+  //     }
+  //     break;
+
+  //   default:
+  //     break;
   // }
 
-  switch (active) {
-    case 0:
-      DrawInputBox({150, 220, 100, 50}, "Add to first", input[0], value[0],
-                       enableInput[0]);
-      DrawInputBox({300, 220, 100, 50}, "Add to last", input[1], value[1],
-                       enableInput[1]);
-      DrawInputBox({450, 220, 100, 50}, "Value", input[2], value[2],
-                       enableInput[2]);
-      DrawInputBox({600, 220, 100, 50}, "Index", input[3], value[3], enableInput[3]);
-        
-      if (GuiButton({150, 300, 100, 50}, "Add") || GetKeyPressed() == KEY_ENTER) {
-        if (value[0]) {
-          index = 1;
-          add(value[0], 1);
-        }
-        else if (value[1]) {
-          index = getSize() + 1;
-          add(value[1], getSize() + 1);
-        }
-        else if (value[2] && value[3]) {
-          index = value[3];
-          add(value[2], value[3]);
-        }
-        strcpy(input[0], "");
-        strcpy(input[1], "");
-        strcpy(input[2], "");
-        strcpy(input[3], "");
-        value[0] = value[1] = value[2] = value[3] = 0;
-      }
-      break;
-    case 1:
-      if (GuiButton({100, 220, 150, 50}, "Delete head")) {
-        remove(1);
-        isDeleting = true;
-      }
-      if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
-        remove(getSize());
-        isDeleting = true;
-      }
-      if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input[0], value[0],
-                       enableInput[0])) {
-        remove(value[0]);
-        isDeleting = true;
-        strcpy(input[0], "");
-        value[0] = 0;
-      }
-      break;
-    case 2:
-      if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input[0], value[0],
-                       enableInput[0])) {
-        searchDone = false;
-        search(value[0]);
-        strcpy(input[0], "");
-      }
-      break;
-
-    default:
-      break;
-  }
-  if (GuiButton({0, 0, 150, 50}, "play animation")) {
-    animate();
-  }
-
-  active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
+  // active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
   idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (cur != head) cur->guiNode.setIsHead(false);
     cur->guiNode.render();
     if (cur->guiNode.getIsRemove()) continue;
     if (!cur->guiNode.getIsLast()) {
-      cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+      cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
     }
     if (!animDone) {
       if (cur->guiNode.getIsDone()) {
@@ -108,34 +166,53 @@ void SingleLL::render() {
           } else if (idx + 1 < index) cur->next->guiNode.setNewHighlight(1);
         } else if (!cur->next && cur->guiNode.getIsDone()) animDone = true;
       }
-      CustomLog(LOG_DEBUG, TextFormat("idx: %d, index: %d, isDone: %d", idx, index, head->guiNode.getIsDone()), 0);
+      // CustomLog(LOG_DEBUG, TextFormat("idx: %d, index: %d, isDone: %d", idx, index, head->guiNode.getIsDone()), 0);
       if (index == 1 && head->next->guiNode.getIsDone()) animDone = true;
+      if (getSize() == 1) animDone = true;
     }
     // if (cur->next != nullptr && cur->guiNode.getIsLast() && fabs(cur->next->guiNode.getCurPos().y - cur->guiNode.getCurPos().y) < 5) {
     //   cur->guiNode.setIsLast(false);
     // }
     if (idx != index) {
-      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewPos({(float)(50 + 130 * idx), 50});
+      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y});
     } else if (!cur->guiNode.getIsRemove()) {
-      cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
+      cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y + 50});
     }
   }
 
+  CustomLog(LOG_INFO, TextFormat("animDone = %d", animDone), 0);
   if (animDone) {
     idx = 1;
     for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
       if (cur->guiNode.getIsRemove()) continue;
       if (idx + 1 == index && cur->next) {
         cur->guiNode.setIsLast(false);
-        cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+        cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
       } else if (idx == index || index == 1) {
         if (cur->next) {
           cur->guiNode.setIsLast(false);
-          cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 80, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+          cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
         }
         index = -1;
+      } else if (cur->next) {
+        cur->guiNode.setIsLast(false);
+        cur->guiNode.setArrow({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
       }
     }
+    // if (randomSize) {
+    //   if (index == -10 || tail->guiNode.getIsDone() || getSize() == 1) {
+    //     index = getSize() + 1;
+    //     add(rand() % 100, index);
+    //     randomSize--;
+    //   }
+    // } else index = -10;
+    // if (fileData != nullptr) {
+    //   if (index == -10 || tail->guiNode.getIsDone()) {
+    //     index = getSize() + 1;
+    //     add(atoi(fileData), index);
+    //     fileData = strtok(nullptr, ",");
+    //   }
+    // } else if (!randomSize && animDone) index = -10;
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
       if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewOpacity(1);
       cur->guiNode.setIsDone(false);
@@ -157,20 +234,20 @@ int SingleLL::getHead() {
   return head->val;
 }
 
-bool SingleLL::add(int val, int pos) {
+bool SingleLL::add(int val, int pos, bool hasAnimation) {
   if (getSize() >= 10)
     return false;
   // if (pos)
   //   // search();
-  if (head) {
+  CustomLog(LOG_INFO, TextFormat("hasAnimation = %d", hasAnimation), 0);
+  if (head && hasAnimation) {
     animate();
   }
-  CustomLog(LOG_DEBUG, TextFormat("pos = %d, getSize() = %d", pos, getSize()), 0);
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  if (pos > 1 && pos <= getSize()) newNode->guiNode = GuiNode({(float)(50 + 130 * (pos)), 120});
-  else newNode->guiNode = GuiNode({(float)(50 + 130 * pos), 120});
+  if (pos > 1 && pos <= getSize()) newNode->guiNode = GuiNode({(float)(50 + BASE_X * (pos)), BASE_Y + 50});
+  else newNode->guiNode = GuiNode({(float)(50 + BASE_X * pos), BASE_Y + 50});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
   newNode->guiNode.setIsLast(true);
@@ -221,10 +298,9 @@ bool SingleLL::add(int val, int pos) {
 }
 
 void SingleLL::getRandom() {
-  // removeAll();
-  int n = 1;
-  for (int i = 0; i < n; i++) {
-    add(rand() % 20, 0);
+  randomSize = max(1, rand() % 11);
+  while (randomSize--) {
+    add(rand() % 100, getSize() + 1, false);
   }
 }
 
@@ -233,7 +309,7 @@ void SingleLL::remove(int id) {
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
       // CustomLog(LOG_DEBUG, "found == tail", 0);
-      cur->guiNode.setNewPos({(float)(50 + 130 * idx), 120});
+      cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y + 50});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
     }
@@ -242,7 +318,9 @@ void SingleLL::remove(int id) {
 
 void SingleLL::removeAll() {
   while (head != nullptr) {
-    remove(0);
+    Node *tmp = head;
+    head = head->next;
+    delete tmp;
   }
 }
 
@@ -289,4 +367,38 @@ void SingleLL::search(int val) {
     return;
   head->guiNode.setNewHighlight();
   animDone = false;
+}
+
+void SingleLL::reset() {
+  showCreateButtons = false;
+  showAddButtons = false;
+  showDeleteButtons = false;
+  showSearchButtons = false;
+  showUpdateButtons = false;
+  showInputBox = false;
+}
+
+void SingleLL::createRandomList() {
+  removeAll();
+  getRandom();
+  setIsLast();
+}
+
+void SingleLL::addFromFile() {
+  removeAll();
+  fileData = LoadFileText(filePath);
+  strtok(fileData, ",");
+  while (fileData != NULL) {
+    add(atoi(fileData), getSize() + 1, false);
+    fileData = strtok(NULL, ",");
+  }
+  setIsLast();
+}
+
+void SingleLL::setIsLast() {
+  for (Node* cur = head; cur != nullptr; cur = cur->next) {
+    if (cur->next) {
+      cur->guiNode.setIsLast(false);
+    }
+  }
 }

@@ -550,6 +550,7 @@ RAYGUIAPI void GuiDrawIcon(int iconId, int posX, int posY, int pixelSize, Color 
 
 RAYGUIAPI unsigned int *GuiGetIcons(void);                      // Get full icons data pointer
 RAYGUIAPI unsigned int *GuiGetIconData(int iconId);             // Get icon bit data
+RAYGUIAPI char **GuiLoadIcons(const char *fileName, bool loadIconsName);
 RAYGUIAPI void GuiSetIconData(int iconId, unsigned int *data);  // Set icon bit data
 RAYGUIAPI void GuiSetIconScale(unsigned int scale);             // Set icon scale (1 by default)
 
@@ -781,7 +782,7 @@ typedef enum {
     ICON_216                      = 216,
     ICON_217                      = 217,
     ICON_218                      = 218,
-    ICON_219                      = 219,
+    ICON_PLUS                     = 219,
     ICON_220                      = 220,
     ICON_221                      = 221,
     ICON_222                      = 222,

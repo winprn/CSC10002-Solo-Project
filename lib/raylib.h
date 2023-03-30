@@ -79,7 +79,7 @@
 #define RAYLIB_H
 
 #include <stdarg.h>     // Required for: va_list - Only used by TraceLogCallback
-
+#include <stdlib.h>
 #define RAYLIB_VERSION  "4.2"
 
 // Function specifiers in case library is build/used as a shared library (Windows)
