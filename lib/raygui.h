@@ -783,7 +783,7 @@ typedef enum {
     ICON_217                      = 217,
     ICON_218                      = 218,
     ICON_PLUS                     = 219,
-    ICON_220                      = 220,
+    ICON_MINUS                    = 220,
     ICON_221                      = 221,
     ICON_222                      = 222,
     ICON_223                      = 223,

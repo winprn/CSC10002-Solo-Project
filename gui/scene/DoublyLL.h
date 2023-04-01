@@ -1,14 +1,14 @@
-#ifndef SINGLE_LINKED_LIST_H
-#define SINGLE_LINKED_LIST_H
+#ifndef DOUBLY_LINKED_LIST_H
+#define DOUBLY_LINKED_LIST_H
 
 #include "../../lib/raylib.h"
 #include "../components/GuiNode.h"
 #include <string>
 
-class SingleLL {
+class DoublyLL {
     struct Node {
         int val;
-        Node* next = nullptr;
+        Node* next = nullptr, *prev = nullptr;
         GuiNode guiNode;
     };
 
@@ -22,8 +22,8 @@ class SingleLL {
     const char* options = "ADD;DELETE;SEARCH";
 
     int active = 0;
-    SingleLL(): head(nullptr), tail(nullptr) {}
-    ~SingleLL() {
+    DoublyLL(): head(nullptr), tail(nullptr) {}
+    ~DoublyLL() {
         // delete active;
     }
     

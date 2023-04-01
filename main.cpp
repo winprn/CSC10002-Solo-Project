@@ -2,6 +2,7 @@
 #include "gui/components/GuiNode.h"
 #include "gui/components/Arrow.h"
 #include "gui/scene/SingleLL.h"
+#include "gui/scene/DoublyLL.h"
 #include "lib/raygui.h"
 #include "lib/raylib.h"
 #include "utils/Log.h"
@@ -43,6 +44,7 @@ int main() {
   InitWindow(1280, 720, "testss");
   SetTargetFPS(60);
   SingleLL ll;
+  DoublyLL dll;
   // ll.getRandom();
   ll.add(10, 1);
   GuiLoadStyle("gui/styles.rgs");
@@ -63,6 +65,9 @@ int main() {
         break;
       case 1:
         ll.render();
+        break;
+      case 2:
+        dll.render();
         break;
     }
     // Vector2 curPos{50, 500};

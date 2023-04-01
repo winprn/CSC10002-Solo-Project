@@ -1,4 +1,4 @@
-#include "SingleLL.h"
+#include "DoublyLL.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
 #include "../../lib/gui_file_dialog.h"
@@ -11,7 +11,7 @@
 using namespace std;
 using namespace Settings;
 
-void SingleLL::render() {
+void DoublyLL::render() {
   ClearBackground(RAYWHITE);
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
@@ -253,6 +253,9 @@ void SingleLL::render() {
     if (!cur->guiNode.getIsLast()) {
       cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
     }
+    if (cur != head) {
+        cur->guiNode.setArrowPrev({cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25}, {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25});
+    }
     if (!animDone) {
       if (cur->guiNode.getIsDone()) {
         if (cur->next && !cur->next->guiNode.getHighlight() && !cur->next->guiNode.getIsDone()) {
@@ -291,18 +294,6 @@ void SingleLL::render() {
       cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y + 50});
     }
   }
-
-  Image img = LoadImage("images/SLL/search_resized.png");
-  // read image from file and draw it
-  Texture2D texture = LoadTextureFromImage(img);
-  DrawTexture(texture, 895, 490, WHITE);
-  DrawRectangle(895, 535, 385, 20, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 1, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 2, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 3, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 4, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 5, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 6, 385, 22, ColorAlpha(WHITE, 0.5));
 
   CustomLog(LOG_INFO, TextFormat("animDone = %d", animDone), 0);
   if (animDone) {
@@ -345,7 +336,7 @@ void SingleLL::render() {
   }
 }
 
-int SingleLL::getSize() {
+int DoublyLL::getSize() {
   int sz = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     sz++;
@@ -353,13 +344,13 @@ int SingleLL::getSize() {
   return sz;
 }
 
-int SingleLL::getHead() {
+int DoublyLL::getHead() {
   if (head == nullptr)
     return 123;
   return head->val;
 }
 
-bool SingleLL::add(int val, int pos, bool hasAnimation) {
+bool DoublyLL::add(int val, int pos, bool hasAnimation) {
   if (getSize() >= 10)
     return false;
   // if (pos)
@@ -371,6 +362,7 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
+  newNode->prev = nullptr;
   if (pos > 1 && pos <= getSize()) newNode->guiNode = GuiNode({(float)(50 + BASE_X * (pos)), BASE_Y + 50});
   else newNode->guiNode = GuiNode({(float)(50 + BASE_X * pos), BASE_Y + 50});
   newNode->guiNode.setVal(val);
@@ -395,6 +387,7 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
         // CustomLog(LOG_ERROR, "hihihi", 0);
       } else {
         tail->next = newNode;
+        newNode->prev = tail;
         // tail->guiNode.setIsRotateArrow(true);
         tail = newNode;
         tail->guiNode.setIsLast(true);
@@ -408,11 +401,12 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
         cur->guiNode.setIsLast(true);
         cur->guiNode.setArrowNext({0, 0}, {0, 0});
         newNode->next = cur->next;
+        newNode->prev = cur;
         cur->next = newNode;
         break;
       }
     }
-    // newNode->guiNode.setArrowNext({newNode->guiNode.getCurPos().x + 80, newNode->guiNode.getCurPos().y + 25}, {newNode->next->guiNode.getCurPos().x, newNode->next->guiNode.getCurPos().y + 25});
+    // newNode->guiNode.setArrow({newNode->guiNode.getCurPos().x + 80, newNode->guiNode.getCurPos().y + 25}, {newNode->next->guiNode.getCurPos().x, newNode->next->guiNode.getCurPos().y + 25});
   }
   if (head) {
     head->guiNode.setIsHead(true);
@@ -422,14 +416,14 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
   return true;
 }
 
-void SingleLL::getRandom() {
+void DoublyLL::getRandom() {
   randomSize = max(1, rand() % 11);
   while (randomSize--) {
     add(rand() % 100, getSize() + 1, false);
   }
 }
 
-void SingleLL::remove(int id) {
+void DoublyLL::remove(int id) {
   int idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
@@ -441,7 +435,7 @@ void SingleLL::remove(int id) {
   }
 }
 
-void SingleLL::removeAll() {
+void DoublyLL::removeAll() {
   while (head != nullptr) {
     Node *tmp = head;
     head = head->next;
@@ -449,7 +443,7 @@ void SingleLL::removeAll() {
   }
 }
 
-void SingleLL::removeFromLL() {
+void DoublyLL::removeFromLL() {
   Node* found = nullptr;
   int idx = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
@@ -481,14 +475,14 @@ void SingleLL::removeFromLL() {
   }
 }
 
-void SingleLL::animate() {
+void DoublyLL::animate() {
   if (head == nullptr)
     return;
   head->guiNode.setNewHighlight(1);
   animDone = false;
 }
 
-void SingleLL::search(int val) {
+void DoublyLL::search(int val) {
   CustomLog(LOG_DEBUG, "inside search", 0);
   if (head == nullptr)
     return;
@@ -496,7 +490,7 @@ void SingleLL::search(int val) {
   animDone = false;
 }
 
-void SingleLL::reset() {
+void DoublyLL::reset() {
   showCreateButtons = false;
   showAddButtons = false;
   showDeleteButtons = false;
@@ -505,13 +499,13 @@ void SingleLL::reset() {
   memset(showInputBox, 0, sizeof(showInputBox));
 }
 
-void SingleLL::createRandomList() {
+void DoublyLL::createRandomList() {
   removeAll();
   getRandom();
   setIsLast();
 }
 
-void SingleLL::addFromFile() {
+void DoublyLL::addFromFile() {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");
@@ -522,7 +516,7 @@ void SingleLL::addFromFile() {
   setIsLast();
 }
 
-void SingleLL::setIsLast() {
+void DoublyLL::setIsLast() {
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     if (cur->next) {
       cur->guiNode.setIsLast(false);
@@ -530,7 +524,7 @@ void SingleLL::setIsLast() {
   }
 }
 
-void SingleLL::update() {
+void DoublyLL::update() {
   isUpdating = true;
   animate();
 }

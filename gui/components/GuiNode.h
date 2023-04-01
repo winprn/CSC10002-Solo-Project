@@ -11,7 +11,8 @@ class GuiNode {
     Vector2 curPos, newPos;
     float curOpacity = 1.0, newOpacity, progress = 0, curLength = 0, lineLength = 0, angle;
     bool isLast = false, isOutdated = false, isShifted = false, isHighlighted = false, isDone = false, isRemove = false, isLengthChanged = false, isHead = false;
-    Arrow arr;
+    Arrow arrNext, arrPrev;
+    Color highlightColor = BLACK;
 
     public:
     GuiNode() {}
@@ -54,7 +55,7 @@ class GuiNode {
     }
 
     Vector2 getArrow() {
-        return arr.start;
+        return arrNext.start;
     }
 
     void render(bool isHighlight = 0) {
@@ -72,7 +73,7 @@ class GuiNode {
             double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
             curPos.x += dx / 30;
             curPos.y += dy / 30;
-            arr.start = {curPos.x + 60, curPos.y + 25};
+            arrNext.start = {curPos.x + 60, curPos.y + 25};
 
             if (fabs(dx) <= 0.05 && fabs(dy) <= 0.05) {
                 curPos = newPos;
@@ -82,15 +83,15 @@ class GuiNode {
 
         Rectangle rect = {curPos.x, curPos.y, 70, 50};
         if (isHead) {
-            DrawText("Head", curPos.x + 20, curPos.y - 20, 20, Fade(BLACK, curOpacity));
+            DrawText("Head", curPos.x + 10, curPos.y - 20, 20, Fade(BLACK, curOpacity));
         }
         if (isHighlighted) {
-            DrawRectangleRounded(rect, 0.15, 20, Fade(BLACK, curOpacity));
+            DrawRectangleRounded(rect, 0.15, 20, Fade(highlightColor, curOpacity));
             DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2, Fade(WHITE, curOpacity));
             DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(WHITE, curOpacity));
-            DrawText("cur", curPos.x + 20, curPos.y + 66, 20, Fade(BLACK, curOpacity));
+            DrawText("cur", curPos.x + 20, curPos.y + 66, 20, Fade(highlightColor, curOpacity));
             progress += 0.032;
-            CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
+            // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
             if (progress > highlight) {
                 isDone = true;
                 isHighlighted = false;
@@ -102,7 +103,7 @@ class GuiNode {
             DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20, Fade(BLACK, curOpacity));
         }
         if (!isLast) {
-            arr.render();
+            arrNext.render();
         }
     }
 
@@ -149,13 +150,22 @@ class GuiNode {
         this->angle = angle;
     }
 
-    void setArrow(Vector2 s, Vector2 e) {
-        arr = Arrow(s, e);
+    void setArrowNext(Vector2 s, Vector2 e) {
+        arrNext = Arrow(s, e);
+        // render();
+    }
+
+    void setArrowPrev(Vector2 s, Vector2 e) {
+        arrPrev = Arrow(s, e);
         // render();
     }
 
     void setIsHead(bool isHead) {
         this->isHead = isHead;
+    }
+
+    void setHighLightColor(Color color) {
+        highlightColor = color;
     }
 };
 
