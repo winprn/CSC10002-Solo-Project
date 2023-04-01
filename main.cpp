@@ -1,6 +1,7 @@
 #include "Function.h"
 #include "gui/components/GuiNode.h"
 #include "gui/components/Arrow.h"
+#include "gui/components/MenuItem.h"
 #include "gui/scene/SingleLL.h"
 #include "gui/scene/DoublyLL.h"
 #include "lib/raygui.h"
@@ -11,30 +12,26 @@
 
 using namespace std;
 
-bool drawRectangleMenu(Rectangle rect, char *text, char *imgPath) {
-  Image img = LoadImage(imgPath);
-  // read image from file and draw it
-  DrawRectangleRounded(rect, 0.05, 20, Color({233, 236, 239, 255}));
-  Texture2D texture = LoadTextureFromImage(img);
-  DrawTexture(texture, rect.x, rect.y, WHITE);
+// bool drawRectangleMenu(Rectangle rect, char *text, char *imgPath) {
+//   Image img = LoadImage(imgPath);
+//   // read image from file and draw it
+//   DrawRectangleRounded(rect, 0.05, 20, Color({233, 236, 239, 255}));
+//   Texture2D texture = LoadTextureFromImage(img);
+//   DrawTexture(texture, rect.x, rect.y, WHITE);
 
-  DrawTextEx(Settings::font, text, {rect.x + 84, rect.y + 164}, 20, 1, Color({0, 0, 0, 255}));
-  // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255})); 
-  if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect)) return true;
+//   DrawTextEx(Settings::font, text, {rect.x + 84, rect.y + 164}, 20, 1, Color({0, 0, 0, 255}));
+//   // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255})); 
+//   if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect)) return true;
 
-  return false;
-}
-
+//   return false;
+// }
+  
 void drawMenu(int &screen) {
-  DrawTextEx(Settings::font, "Welcome to VisuAlgo - cloned by @winprn", {266, 32}, 40, 1, Color({233, 236, 239, 255}));
-  DrawTextEx(Settings::font, "Ly Dinh Minh Man - 22127255 - 22CLC06", {424, 98}, 24, 1, Color({233, 236, 239, 255}));
-  if (drawRectangleMenu({56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png")) {
-    screen = 1;
-  }
-  if (drawRectangleMenu({475, 191, 330, 200}, "Doubly Linked List", "images/dll_menu.png")) {
-    screen = 1;
-  }
-  if (drawRectangleMenu({895, 191, 330, 200}, "Circular Linked List", "images/cll_menu.png")) {
+  DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn", {266, 32}, 40, 1, Color({233, 236, 239, 255}));
+  DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06", {424, 98}, 24, 1, Color({233, 236, 239, 255}));
+
+  MenuItem sll = MenuItem{{56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
+  if (sll.render()) {
     screen = 1;
   }
 }
@@ -53,7 +50,8 @@ int main() {
   bool ok = 0;
   CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
   // float angle = 30;
-  Settings::font = LoadFontEx("gui/Roboto-Regular.ttf", 100, NULL, 0);
+  Settings::font_regular = LoadFontEx("gui/Roboto-Regular.ttf", 100, NULL, 0);
+  Settings::font_bold = LoadFontEx("gui/Roboto-Bold.ttf", 100, NULL, 0);
   int screen = 0;
   while (!WindowShouldClose()) {
     BeginDrawing();

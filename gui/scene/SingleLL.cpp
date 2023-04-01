@@ -16,7 +16,7 @@ void SingleLL::render() {
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  DrawTextEx(font, "Singly Linked List", {501, 31}, 40, 1, BLACK);
+  DrawTextEx(font_bold, "Singly Linked List", {501, 31}, 40, 1, BLACK);
 
   if (GuiButton({100, 415, 100, 40}, "Create")) {
     reset();
