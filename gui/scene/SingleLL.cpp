@@ -1,7 +1,7 @@
 #include "SingleLL.h"
+#include "../../lib/gui_file_dialog.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
-#include "../../lib/gui_file_dialog.h"
 #include "../../utils/Log.h"
 #include "../../utils/Settings.h"
 #include "../components/GuiNode.h"
@@ -46,12 +46,11 @@ void SingleLL::render() {
     if (GuiButton({400, 415, 100, 40}, "From file")) {
       fileDialogState.windowActive = true;
     }
-    if (fileDialogState.windowActive) GuiLock();
+    if (fileDialogState.windowActive)
+      GuiLock();
     GuiUnlock();
-    if (fileDialogState.SelectFilePressed)
-    {
-      if (IsFileExtension(fileDialogState.fileNameText, ".txt"))
-      {
+    if (fileDialogState.SelectFilePressed) {
+      if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
         strcpy(filePath, fileDialogState.fileNameText);
         CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
         addFromFile();
@@ -63,11 +62,14 @@ void SingleLL::render() {
   if (showAddButtons) {
     if (GuiButton({280, 475, 100, 40}, "Add to head")) {
       memset(showInputBox, 0, sizeof(showInputBox));
+      memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[0] = true;
     }
     if (showInputBox[0]) {
-      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0], enableInput[0], ICON_PLUS)) {
+      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0],
+                       enableInput[0], ICON_PLUS)) {
         index = 1;
+        isAddToHead = true;
         add(value[0], 1);
         showInputBox[0] = false;
         strcpy(input[0], "");
@@ -75,12 +77,15 @@ void SingleLL::render() {
     }
     if (GuiButton({400, 475, 100, 40}, "Add to tail")) {
       memset(showInputBox, 0, sizeof(showInputBox));
+      memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[1] = true;
     }
     if (showInputBox[1]) {
-      if (DrawInputBox({400, 535, 60, 30}, "", input[0], value[0], enableInput[0], ICON_PLUS)) {
-        index = getSize() + 1;
-        add(value[0], getSize() + 1);
+      if (DrawInputBox({400, 535, 60, 30}, "", input[0], value[0],
+                       enableInput[0], ICON_PLUS)) {
+        index = -1;
+        isAddToTail = true;
+        add(value[0], getSize() + 1, 0);
         showInputBox[1] = false;
         strcpy(input[0], "");
       }
@@ -90,23 +95,31 @@ void SingleLL::render() {
       showInputBox[2] = true;
     }
     if (showInputBox[2]) {
-      if (GuiTextBox({520, 535, 30, 30}, input[0], 10, enableInput[0]) && strlen(input[0])) {
+      if (GuiTextBox({520, 535, 30, 30}, input[0], 10, enableInput[0]) &&
+          strlen(input[0])) {
         int id = atoi(input[0]);
         value[0] = id;
       }
       if (IsMouseButtonDown(0)) {
-        if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {520, 535, 30, 30})) {
+        if (CheckCollisionPointRec(
+                (Vector2){(float)GetMouseX(), (float)GetMouseY()},
+                {520, 535, 30, 30})) {
           enableInput[0] = true;
-        } else enableInput[0] = false;
+        } else
+          enableInput[0] = false;
       }
-      if (GuiTextBox({555, 535, 30, 30}, input[1], 10, enableInput[1]) && strlen(input[1])) {
+      if (GuiTextBox({555, 535, 30, 30}, input[1], 10, enableInput[1]) &&
+          strlen(input[1])) {
         int id = atoi(input[1]);
         value[1] = id;
       }
       if (IsMouseButtonDown(0)) {
-        if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {555, 535, 30, 30})) {
-            enableInput[1] = true;
-        } else enableInput[1] = false;
+        if (CheckCollisionPointRec(
+                (Vector2){(float)GetMouseX(), (float)GetMouseY()},
+                {555, 535, 30, 30})) {
+          enableInput[1] = true;
+        } else
+          enableInput[1] = false;
       }
       if (GuiButton({590, 535, 30, 30}, GuiIconText(ICON_PLUS, ""))) {
         index = value[0];
@@ -131,7 +144,8 @@ void SingleLL::render() {
       showInputBox[0] = true;
     }
     if (showInputBox[0]) {
-      if (DrawInputBox({520, 595, 60, 30}, "", input[0], value[0], enableInput[0], ICON_MINUS)) {
+      if (DrawInputBox({520, 595, 60, 30}, "", input[0], value[0],
+                       enableInput[0], ICON_MINUS)) {
         index = value[0];
         remove(index);
         showInputBox[1] = false;
@@ -140,9 +154,14 @@ void SingleLL::render() {
     }
   }
   if (showSearchButtons) {
-    if(DrawInputBox({240, 595, 50, 30}, "", input[0], value[0], enableInput[0], ICON_LENS)) {
+    if (DrawInputBox({240, 595, 50, 30}, "", input[0], value[0], enableInput[0],
+                     ICON_LENS)) {
       index = value[0];
       isSearching = true;
+      shouldHighlight = false;
+      needUpdate = true;
+      found = false;
+      memset(lineHighlight, 0, sizeof(lineHighlight));
       search(index);
       strcpy(input[0], "");
     }
@@ -152,23 +171,31 @@ void SingleLL::render() {
     //   memset(showInputBox, 0, sizeof(showInputBox));
     //   showInputBox[0] = true;
     // }
-    if (GuiTextBox({240, 655, 30, 30}, input[0], 10, enableInput[0]) && strlen(input[0])) {
+    if (GuiTextBox({240, 655, 30, 30}, input[0], 10, enableInput[0]) &&
+        strlen(input[0])) {
       int id = atoi(input[0]);
       value[0] = id;
     }
     if (IsMouseButtonDown(0)) {
-      if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {240, 655, 30, 30})) {
+      if (CheckCollisionPointRec(
+              (Vector2){(float)GetMouseX(), (float)GetMouseY()},
+              {240, 655, 30, 30})) {
         enableInput[0] = true;
-      } else enableInput[0] = false;
+      } else
+        enableInput[0] = false;
     }
-    if (GuiTextBox({275, 655, 30, 30}, input[1], 10, enableInput[1]) && strlen(input[1])) {
+    if (GuiTextBox({275, 655, 30, 30}, input[1], 10, enableInput[1]) &&
+        strlen(input[1])) {
       int id = atoi(input[1]);
       value[1] = id;
     }
     if (IsMouseButtonDown(0)) {
-      if (CheckCollisionPointRec((Vector2){(float)GetMouseX(), (float)GetMouseY()}, {275, 655, 30, 30})) {
-          enableInput[1] = true;
-      } else enableInput[1] = false;
+      if (CheckCollisionPointRec(
+              (Vector2){(float)GetMouseX(), (float)GetMouseY()},
+              {275, 655, 30, 30})) {
+        enableInput[1] = true;
+      } else
+        enableInput[1] = false;
     }
     if (GuiButton({310, 655, 30, 30}, GuiIconText(ICON_REPEAT_FILL, ""))) {
       index = value[0];
@@ -182,165 +209,252 @@ void SingleLL::render() {
     }
   }
 
-  // switch (active) {
-  //   case 0:
-  //     DrawInputBox({150, 220, 100, 50}, "Add to first", input[0], value[0],
-  //                      enableInput[0]);
-  //     DrawInputBox({300, 220, 100, 50}, "Add to last", input[1], value[1],
-  //                      enableInput[1]);
-  //     DrawInputBox({450, 220, 100, 50}, "Value", input[2], value[2],
-  //                      enableInput[2]);
-  //     DrawInputBox({600, 220, 100, 50}, "Index", input[3], value[3], enableInput[3]);
-
-  //     // GuiSetStyle(DEFAULT, TEXT_SIZE, 20);  
-  //     if (GuiButton({150, 300, 100, 50}, "Add") || GetKeyPressed() == KEY_ENTER) {
-  //       if (value[0]) {
-  //         index = 1;
-  //         add(value[0], 1);
-  //       }
-  //       else if (value[1]) {
-  //         index = getSize() + 1;
-  //         add(value[1], getSize() + 1);
-  //       }
-  //       else if (value[2] && value[3]) {
-  //         index = value[3];
-  //         add(value[2], value[3]);
-  //       }
-  //       strcpy(input[0], "");
-  //       strcpy(input[1], "");
-  //       strcpy(input[2], "");
-  //       strcpy(input[3], "");
-  //       value[0] = value[1] = value[2] = value[3] = 0;
-  //     }
-  //     break;
-  //   case 1:
-  //     if (GuiButton({100, 220, 150, 50}, "Delete head")) {
-  //       remove(1);
-  //       isDeleting = true;
-  //     }
-  //     if (GuiButton({300, 220, 150, 50}, "Delete tail")) {
-  //       remove(getSize());
-  //       isDeleting = true;
-  //     }
-  //     if (DrawInputBox({500, 220, 150, 50}, "Input index to delete", input[0], value[0],
-  //                      enableInput[0])) {
-  //       remove(value[0]);
-  //       isDeleting = true;
-  //       strcpy(input[0], "");
-  //       value[0] = 0;
-  //     }
-  //     break;
-  //   case 2:
-  //     if (DrawInputBox({500, 220, 150, 50}, "Input value to search", input[0], value[0],
-  //                      enableInput[0])) {
-  //       searchDone = false;
-  //       search(value[0]);
-  //       strcpy(input[0], "");
-  //     }
-  //     break;
-
-  //   default:
-  //     break;
-  // }
-
-  // active = GuiComboBox((Rectangle){150, 150, 120, 50}, options, active);
+  if (isSearching || !rect.getIsDone()) {
+    Image img = LoadImage("images/SLL/search.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
+  if (isAddToHead) {
+    Image img = LoadImage("images/SLL/add_head.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
+  if (isAddToTail) {
+    Image img = LoadImage("images/SLL/add_tail.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
+  if (!shouldHighlight) {
+    if (!lineHighlight[0]) {
+      if (needUpdate) {
+        rect.update(0, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[0] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[1]) {
+      if (needUpdate) {
+        rect.update(1, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[1] = true;
+        needUpdate = true;
+      }
+    } else {
+      shouldHighlight = true;
+      head->guiNode.setNewHighlight();
+      needUpdate = true;
+      isCodeNext = true;
+      isNodeNext = false;
+    }
+  }
   idx = 1;
+  rect.render();
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
-    if (cur != head) cur->guiNode.setIsHead(false);
-    else cur->guiNode.setIsHead(true);
-    cur->guiNode.render();
-    if (cur->guiNode.getIsRemove()) continue;
+    if (isAddToHead) {
+      head->next->guiNode.setIsHead(true);
+    } else {
+      if (cur != head)
+        cur->guiNode.setIsHead(false);
+      else
+        cur->guiNode.setIsHead(true);
+    }
+    if (isAddToTail) {
+      if (rect.getPos() == 1) {
+        if (cur->next) {
+          cur->guiNode.setIsLast(false);
+        }
+      }
+      if (rect.getPos() == 2) {
+        if (!cur->next)
+          cur->guiNode.setIsLast(true);
+      }
+    }
+    if (cur->guiNode.getIsRemove())
+      continue;
     if (!cur->guiNode.getIsLast()) {
-      cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+      cur->guiNode.setArrowNext(
+          {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
+          {cur->next->guiNode.getCurPos().x,
+           cur->next->guiNode.getCurPos().y + 25});
+    }
+    cur->guiNode.render();
+    // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
+    if (cur->guiNode.getProgress() >= 0.5) {
+      isCodeNext = true;
+      isNodeNext = false;
     }
     if (!animDone) {
-      if (cur->guiNode.getIsDone()) {
-        if (cur->next && !cur->next->guiNode.getHighlight() && !cur->next->guiNode.getIsDone()) {
-          if (cur->next->val == value[0] || idx + 1 == index) {
-            if (isUpdating) {
-              cur->next->guiNode.setVal(newVal);
-              cur->next->guiNode.setHighLightColor(GREEN);
-              isUpdating = false;
-            }
-            if (isSearching) {
-              cur->next->guiNode.setHighLightColor(GREEN);
-              isSearching = false;
-            }
-            cur->next->guiNode.setNewHighlight(3);
-            animDone = true;
-          } else if (idx + 1 < index) cur->next->guiNode.setNewHighlight(1);
-        } else if (!cur->next && cur->guiNode.getIsDone()) animDone = true;
-      }
-      // CustomLog(LOG_DEBUG, TextFormat("idx: %d, index: %d, isDone: %d", idx, index, head->guiNode.getIsDone()), 0);
-      if (index == 1 && head->next && head->next->guiNode.getIsDone()) animDone = true;
-      if (getSize() == 1) {
-        if (isUpdating) {
-          head->guiNode.setVal(newVal);
-          head->val = newVal;
-          isUpdating = false;
+      if (isSearching && isCodeNext) {
+        if (!lineHighlight[2]) {
+          if (needUpdate) {
+            // CustomLog(LOG_DEBUG, "updated line 2", 0);
+            rect.update(2, 0.4);
+            needUpdate = false;
+          }
+          if (rect.getIsDone()) {
+            lineHighlight[2] = true;
+            lineHighlight[3] = false;
+            needUpdate = true;
+            isNodeNext = true;
+            isCodeNext = false;
+          }
+        } else if (!lineHighlight[3]) {
+          if (needUpdate) {
+            rect.update(3, 0.6);
+            needUpdate = false;
+          }
+          if (rect.getIsDone()) {
+            lineHighlight[3] = true;
+            lineHighlight[2] = false;
+            needUpdate = true;
+            isNodeNext = true;
+            isCodeNext = false;
+          }
         }
-        animDone = true;
+      }
+      if (cur->guiNode.getIsDone() && shouldHighlight) {
+        if (isNodeNext) {
+          if (cur->next && !cur->next->guiNode.getHighlight() &&
+              !cur->next->guiNode.getIsDone()) {
+            if ((isSearching && cur->next->val == value[0]) ||
+                (!isSearching && idx + 1 == index)) {
+              if (isUpdating) {
+                cur->next->guiNode.setVal(newVal);
+                cur->next->guiNode.setHighLightColor(GREEN);
+                isUpdating = false;
+              }
+              if (isSearching) {
+                cur->next->guiNode.setHighLightColor(GREEN);
+              }
+              cur->next->guiNode.setNewHighlight(2);
+              found = true;
+              animDone = true;
+            } else if (idx + 1 < index) {
+              cur->next->guiNode.setNewHighlight(1);
+            }
+          } else if (!cur->next && cur->guiNode.getIsDone())
+            animDone = true;
+        }
+        // CustomLog(LOG_DEBUG, TextFormat("idx: %d, index: %d, isDone: %d", idx, index, head->guiNode.getIsDone()), 0);
+        if (index == 1 && head->next && head->next->guiNode.getIsDone())
+          animDone = true;
+        if (getSize() == 1) {
+          if (isUpdating) {
+            head->guiNode.setVal(newVal);
+            head->val = newVal;
+            isUpdating = false;
+          }
+          animDone = true;
+        }
       }
     }
     // if (cur->next != nullptr && cur->guiNode.getIsLast() && fabs(cur->next->guiNode.getCurPos().y - cur->guiNode.getCurPos().y) < 5) {
     //   cur->guiNode.setIsLast(false);
     // }
     if (idx != index || isUpdating || isSearching) {
-      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y});
+      if (!cur->guiNode.getIsRemove())
+        cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y});
     } else if (!cur->guiNode.getIsRemove()) {
       cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y + 50});
     }
   }
-
-  Image img = LoadImage("images/SLL/search_resized.png");
-  // read image from file and draw it
-  Texture2D texture = LoadTextureFromImage(img);
-  DrawTexture(texture, 895, 490, WHITE);
-  DrawRectangle(895, 535, 385, 20, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 1, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 2, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 3, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 4, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 5, 385, 22, ColorAlpha(WHITE, 0.5));
-  DrawRectangle(895, 535 + 23 * 6, 385, 22, ColorAlpha(WHITE, 0.5));
-
-  CustomLog(LOG_INFO, TextFormat("animDone = %d", animDone), 0);
-  if (animDone) {
-    idx = 1;
-    for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
-      if (cur->guiNode.getIsRemove()) continue;
-      if (idx + 1 == index && cur->next) {
-        cur->guiNode.setIsLast(false);
-        cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
-      } else if (idx == index || index == 1) {
-        if (cur->next) {
-          cur->guiNode.setIsLast(false);
-          cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
-        }
-        index = -1;
-      } else if (cur->next) {
-        cur->guiNode.setIsLast(false);
-        cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+  if (isAddToHead || isAddToTail) {
+    CustomLog(LOG_INFO, "tf", 0);
+    if (!lineHighlight[0]) {
+      if (needUpdate) {
+        rect.update(0, 0.3);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[0] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[1]) {
+      if (needUpdate) {
+        rect.update(1, 0.5);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[1] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[2]) {
+      if (needUpdate) {
+        rect.update(2, 0.3);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[2] = true;
+        needUpdate = true;
+        isAddToHead = false;
+        isAddToTail = false;
       }
     }
-    // if (randomSize) {
-    //   if (index == -10 || tail->guiNode.getIsDone() || getSize() == 1) {
-    //     index = getSize() + 1;
-    //     add(rand() % 100, index);
-    //     randomSize--;
+  }
+  if (isSearching && animDone) {
+    if (found) {
+      if (needUpdate) {
+        rect.update(6, 2);
+        needUpdate = false;
+      }
+      if (rect.getIsDone())
+        isSearching = false;
+    } else {
+      if (!lineHighlight[4]) {
+        if (needUpdate) {
+          rect.update(4, 1);
+          needUpdate = false;
+        }
+        if (rect.getIsDone()) {
+          lineHighlight[4] = true;
+          needUpdate = true;
+        }
+      } else if (!lineHighlight[5]) {
+        if (needUpdate) {
+          rect.update(5, 1);
+          needUpdate = false;
+        }
+        if (rect.getIsDone()) {
+          lineHighlight[5] = true;
+          needUpdate = true;
+        }
+      } else if (rect.getIsDone())
+        isSearching = false;
+    }
+  }
+
+  if (animDone) {
+    idx = 1;
+    // for (Node *cur = head; cur != nullptr; cur = cur->next, idx++) {
+    //   if (cur->guiNode.getIsRemove()) continue;
+    //   if (idx + 1 == index && cur->next) {
+    //     cur->guiNode.setIsLast(false);
+    //     cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+    //   } else if (idx == index || index == 1) {
+    //     if (cur->next) {
+    //       cur->guiNode.setIsLast(false);
+    //       cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
+    //     }
+    //     index = -1;
+    //   } else if (cur->next) {
+    //     cur->guiNode.setIsLast(false);
+    //     cur->guiNode.setArrowNext({cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25}, {cur->next->guiNode.getCurPos().x, cur->next->guiNode.getCurPos().y + 25});
     //   }
-    // } else index = -10;
-    // if (fileData != nullptr) {
-    //   if (index == -10 || tail->guiNode.getIsDone()) {
-    //     index = getSize() + 1;
-    //     add(atoi(fileData), index);
-    //     fileData = strtok(nullptr, ",");
-    //   }
-    // } else if (!randomSize && animDone) index = -10;
+    // }
+
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
-      if (!cur->guiNode.getIsRemove()) cur->guiNode.setNewOpacity(1);
+      if (!cur->guiNode.getIsRemove())
+        cur->guiNode.setNewOpacity(1);
+      if (cur->guiNode.getIsDone())
+        cur->guiNode.setHighLightColor(BLACK);
       cur->guiNode.setIsDone(false);
-      if (cur->guiNode.getIsDone()) cur->guiNode.setHighLightColor(BLACK);
     }
   }
 }
@@ -371,8 +485,7 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  if (pos > 1 && pos <= getSize()) newNode->guiNode = GuiNode({(float)(50 + BASE_X * (pos)), BASE_Y + 50});
-  else newNode->guiNode = GuiNode({(float)(50 + BASE_X * pos), BASE_Y + 50});
+  newNode->guiNode = GuiNode({(float)(50 + BASE_X * pos), BASE_Y + 50});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
   newNode->guiNode.setIsLast(true);
@@ -414,11 +527,8 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
     }
     // newNode->guiNode.setArrowNext({newNode->guiNode.getCurPos().x + 80, newNode->guiNode.getCurPos().y + 25}, {newNode->next->guiNode.getCurPos().x, newNode->next->guiNode.getCurPos().y + 25});
   }
-  if (head) {
-    head->guiNode.setIsHead(true);
-  }
-  if (tail != nullptr)
-    tail->guiNode.setIsLast(true);
+  // if (tail != nullptr)
+  //   tail->guiNode.setIsLast(true);
   return true;
 }
 
@@ -443,7 +553,7 @@ void SingleLL::remove(int id) {
 
 void SingleLL::removeAll() {
   while (head != nullptr) {
-    Node *tmp = head;
+    Node* tmp = head;
     head = head->next;
     delete tmp;
   }
@@ -492,7 +602,7 @@ void SingleLL::search(int val) {
   CustomLog(LOG_DEBUG, "inside search", 0);
   if (head == nullptr)
     return;
-  head->guiNode.setNewHighlight();
+  // head->guiNode.setNewHighlight();
   animDone = false;
 }
 
