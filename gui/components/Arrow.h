@@ -4,53 +4,56 @@
 #include "../../lib/raylib.h"
 #include "../../lib/raymath.h"
 #include "../../utils/Log.h"
+#include "../../utils/Settings.h"
+
+using namespace Settings;
 
 class Arrow {
-    public:
-    Vector2 start, end;
-    Arrow(): start{0, 0}, end{0, 0}{}
-    Arrow(Vector2 s, Vector2 e): start{s}, end{e}{}
+ public:
+  Vector2 start, end;
+  Arrow() : start{0, 0}, end{0, 0} {}
+  Arrow(Vector2 s, Vector2 e) : start{s}, end{e} {}
 
-    Vector2 RotatePoint(Vector2 point, Vector2 origin, float angle) {
-        float s = sin(angle * DEG2RAD);
-        float c = cos(angle * DEG2RAD);
+  Vector2 RotatePoint(Vector2 point, Vector2 origin, float angle) {
+    float s = sin(angle * DEG2RAD);
+    float c = cos(angle * DEG2RAD);
 
-        // translate point back to origin:
-        point.x -= origin.x;
-        point.y -= origin.y;
+    // translate point back to origin:
+    point.x -= origin.x;
+    point.y -= origin.y;
 
-        // rotate point
-        float xnew = point.x * c - point.y * s;
-        float ynew = point.x * s + point.y * c;
+    // rotate point
+    float xnew = point.x * c - point.y * s;
+    float ynew = point.x * s + point.y * c;
 
-        // translate point back:
-        point.x = xnew + origin.x;
-        point.y = ynew + origin.y;
+    // translate point back:
+    point.x = xnew + origin.x;
+    point.y = ynew + origin.y;
 
-        return point;
-    }
+    return point;
+  }
 
-    void render() {
-        // draw a line
-        DrawLineEx(start, end, 2, BLACK);
+  void render() {
+    // draw a line
+    DrawLineEx(start, end, 2, textColor);
 
-        // get the first point of the triangle, which is the end of the line
-        Vector2 p1 = end;
-        Vector2 tmp = Vector2MoveTowards(end, start, 10);
-        double dist = Vector2Distance(tmp, p1);
-        // CustomLog(LOG_INFO, TextFormat("%f", dist), 0);
-        Vector2 p2 = RotatePoint(tmp, p1, 45);
-        
-        // get the third point of the triangle, which is symmetric to the second point through the given line
-        Vector2 p3 = RotatePoint(p2, p1, -90);
+    // get the first point of the triangle, which is the end of the line
+    Vector2 p1 = end;
+    Vector2 tmp = Vector2MoveTowards(end, start, 10);
+    double dist = Vector2Distance(tmp, p1);
+    // CustomLog(LOG_INFO, TextFormat("%f", dist), 0);
+    Vector2 p2 = RotatePoint(tmp, p1, 45);
 
-        // CustomLog(LOG_INFO, TextFormat("%f %f", tmp.x, tmp.y), 0);
-        // CustomLog(LOG_INFO, TextFormat("%f %f", p1.x, p1.y), 0);
-        // CustomLog(LOG_INFO, TextFormat("%f %f", p2.x, p2.y), 0);
-        // CustomLog(LOG_INFO, TextFormat("%f %f", p3.x, p3.y), 0);
-        // draw the triangle
-        DrawTriangle(p1, p2, p3, BLACK);
-    }
+    // get the third point of the triangle, which is symmetric to the second point through the given line
+    Vector2 p3 = RotatePoint(p2, p1, -90);
+
+    // CustomLog(LOG_INFO, TextFormat("%f %f", tmp.x, tmp.y), 0);
+    // CustomLog(LOG_INFO, TextFormat("%f %f", p1.x, p1.y), 0);
+    // CustomLog(LOG_INFO, TextFormat("%f %f", p2.x, p2.y), 0);
+    // CustomLog(LOG_INFO, TextFormat("%f %f", p3.x, p3.y), 0);
+    // draw the triangle
+    DrawTriangle(p1, p2, p3, textColor);
+  }
 };
 
 #endif

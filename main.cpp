@@ -1,9 +1,9 @@
 #include "Function.h"
-#include "gui/components/GuiNode.h"
 #include "gui/components/Arrow.h"
+#include "gui/components/GuiNode.h"
 #include "gui/components/MenuItem.h"
-#include "gui/scene/SingleLL.h"
 #include "gui/scene/DoublyLL.h"
+#include "gui/scene/SingleLL.h"
 #include "lib/raygui.h"
 #include "lib/raylib.h"
 #include "utils/Log.h"
@@ -20,17 +20,20 @@ using namespace std;
 //   DrawTexture(texture, rect.x, rect.y, WHITE);
 
 //   DrawTextEx(Settings::font, text, {rect.x + 84, rect.y + 164}, 20, 1, Color({0, 0, 0, 255}));
-//   // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255})); 
+//   // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255}));
 //   if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect)) return true;
 
 //   return false;
 // }
-  
-void drawMenu(int &screen) {
-  DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn", {266, 32}, 40, 1, Color({233, 236, 239, 255}));
-  DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06", {424, 98}, 24, 1, Color({233, 236, 239, 255}));
 
-  MenuItem sll = MenuItem{{56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
+void drawMenu(int& screen) {
+  DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",
+             {266, 32}, 40, 1, Color({233, 236, 239, 255}));
+  DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06",
+             {424, 98}, 24, 1, Color({233, 236, 239, 255}));
+
+  MenuItem sll = MenuItem{
+      {56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
   if (sll.render()) {
     screen = 1;
   }
@@ -55,7 +58,7 @@ int main() {
   int screen = 0;
   while (!WindowShouldClose()) {
     BeginDrawing();
-    ClearBackground(Color({52, 58, 64, 255}));
+    ClearBackground(backgroundColor);
 
     switch (screen) {
       case 0:

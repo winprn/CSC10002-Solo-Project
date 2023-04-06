@@ -3,8 +3,11 @@
 
 #include "../../lib/raylib.h"
 #include "../../utils/Log.h"
+#include "../../utils/Settings.h"
 #include "Arrow.h"
 #include <cmath>
+
+using namespace Settings;
 
 class GuiNode {
   int val;
@@ -13,7 +16,7 @@ class GuiNode {
         curLength = 0, lineLength = 0, angle;
   bool isLast = false, isOutdated = false, isShifted = false,
        isHighlighted = false, isDone = false, isRemove = false,
-       isLengthChanged = false, isHead = false;
+       isLengthChanged = false, isHead = false, shouldRenderArrow = false;
   Arrow arrNext, arrPrev;
   Color highlightColor = BLACK;
 
@@ -71,11 +74,11 @@ class GuiNode {
     Rectangle rect = {curPos.x, curPos.y, 70, 50};
     if (isHead) {
       DrawText("Head", curPos.x + 10, curPos.y - 20, 20,
-               Fade(BLACK, curOpacity));
+               ColorAlpha(textColor, curOpacity));
     }
     if (isLast) {
       DrawText("Tail", curPos.x + 10, curPos.y - 20 + 70 * isHead, 20,
-               Fade(BLACK, curOpacity));
+               ColorAlpha(textColor, curOpacity));
     }
     if (isHighlighted) {
       DrawRectangleRounded(rect, 0.15, 20, Fade(highlightColor, curOpacity));
@@ -84,7 +87,7 @@ class GuiNode {
       DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
                Fade(WHITE, curOpacity));
       DrawText("cur", curPos.x + 20, curPos.y + 66, 20,
-               Fade(highlightColor, curOpacity));
+               ColorAlpha(textColor, curOpacity));
       progress += 0.016;
       // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
       if (progress > highlight) {
@@ -95,13 +98,13 @@ class GuiNode {
     } else {
       DrawRectangleRounded(
           rect, 0.15, 20,
-          Color({217, 217, 217, (unsigned char)(curOpacity * 255)}));
+          ColorAlpha(primaryColor, (unsigned char)(curOpacity * 255)));
       DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                  Fade(BLACK, curOpacity));
       DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
                Fade(BLACK, curOpacity));
     }
-    if (!isLast) {
+    if (shouldRenderArrow && !isRemove && arrNext.end.x != 0) {
       arrNext.render();
     }
   }
@@ -155,6 +158,10 @@ class GuiNode {
   void setIsHead(bool isHead) { this->isHead = isHead; }
 
   void setHighLightColor(Color color) { highlightColor = color; }
+
+  void setShouldRenderArrow(bool shouldRender) {
+    shouldRenderArrow = shouldRender;
+  }
 };
 
 #endif
