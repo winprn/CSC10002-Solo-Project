@@ -22,7 +22,8 @@ class SingleLL {
        showSearchButtons = false, showUpdateButtons = false,
        shouldHighlight = true, shouldMoveUp = true, needUpdate = true,
        found = false, isAddToHead = false, isAddToTail = false,
-       isAddToIndex = false, isNodeNext = false, isCodeNext = false;
+       isAddToIndex = false, isRemoveHead = false, isRemoveTail = false,
+       isNodeNext = false, isCodeNext = false;
   bool enableInput[10] = {false}, showInputBox[10] = {false},
        lineHighlight[10] = {false};
   int value[10] = {0}, index = -1, randomSize = 0, newVal = -1;

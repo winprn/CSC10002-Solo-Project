@@ -143,15 +143,20 @@ void SingleLL::render() {
   if (showDeleteButtons) {
     if (GuiButton({280, 535, 100, 40}, "Delete head")) {
       index = 1;
-      remove(index);
+      isRemoveHead = true;
+      animDone = false;
+      shouldHighlight = false;
+      needUpdate = true;
+      memset(lineHighlight, 0, sizeof(lineHighlight));
     }
     if (GuiButton({400, 535, 100, 40}, "Delete tail")) {
       index = getSize();
       isDeleting = true;
-      isNodeNext = true;
-      shouldHighlight = true;
-      animate();
-      // remove(index);
+      shouldHighlight = false;
+      isRemoveTail = true;
+      needUpdate = true;
+      animDone = false;
+      memset(lineHighlight, 0, sizeof(lineHighlight));
     }
     if (GuiButton({520, 535, 100, 40}, "Delete at index")) {
       memset(showInputBox, 0, sizeof(showInputBox));
@@ -248,6 +253,18 @@ void SingleLL::render() {
     Texture2D texture = LoadTextureFromImage(img);
     DrawTexture(texture, 895, 490, WHITE);
   }
+  if (isRemoveHead) {
+    Image img = LoadImage("images/SLL/remove_head.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
+  if (isRemoveTail) {
+    Image img = LoadImage("images/SLL/remove_tail.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
   if (!shouldHighlight && isSearching) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
@@ -296,6 +313,71 @@ void SingleLL::render() {
       isNodeNext = false;
     }
   }
+  if (!shouldHighlight && isRemoveHead) {
+    if (!lineHighlight[0]) {
+      if (needUpdate) {
+        rect.update(0, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[0] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[1]) {
+      if (needUpdate) {
+        rect.update(1, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[1] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[2]) {
+      if (needUpdate) {
+        rect.update(2, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[2] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[3]) {
+      if (needUpdate) {
+        rect.update(3, 0.5);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[3] = true;
+        needUpdate = true;
+      }
+    }
+  }
+  if (!shouldHighlight && isRemoveTail) {
+    if (!lineHighlight[0]) {
+      if (needUpdate) {
+        rect.update(0, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[0] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[1]) {
+      if (needUpdate) {
+        rect.update(1, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[1] = true;
+        needUpdate = true;
+      }
+    } else {
+      head->guiNode.setNewHighlight();
+      shouldHighlight = true;
+      isCodeNext = true;
+      isNodeNext = false;
+    }
+  }
   idx = 1;
   rect.render();
   // CustomLog(LOG_INFO, TextFormat("shouldHighlight = %d", shouldHighlight), 0);
@@ -306,6 +388,20 @@ void SingleLL::render() {
         if (rect.getPos() == 1) {
           head->guiNode.setShouldRenderArrow(true);
         }
+      }
+    } else if (isRemoveHead) {
+      if (rect.getPos() > 0)
+        DrawTextEx(font_regular, "temp",
+                   {head->guiNode.getCurPos().x + 10,
+                    head->guiNode.getCurPos().y + 60},
+                   20, 1, textColor);
+      if (rect.getPos() > 1) {
+        head->next->guiNode.setIsHead(true);
+        head->guiNode.setIsHead(false);
+      }
+      if (rect.getPos() > 2) {
+        remove(index);
+        index = -1;
       }
     } else {
       if (cur != head)
@@ -327,14 +423,15 @@ void SingleLL::render() {
     cur->guiNode.render();
     if (cur->guiNode.getIsRemove())
       continue;
-    if (!cur->guiNode.getIsLast()) {
+    if (cur->next && !cur->guiNode.getIsLast()) {
       cur->guiNode.setArrowNext(
           {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
           {cur->next->guiNode.getCurPos().x,
            cur->next->guiNode.getCurPos().y + 25});
     }
     // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
-    if ((isSearching || isAddToIndex) && cur->guiNode.getProgress() >= 0.5) {
+    if ((isSearching || isAddToIndex || (isRemoveTail && cur->next != tail)) &&
+        cur->guiNode.getProgress() >= 0.5) {
       isCodeNext = true;
       isNodeNext = false;
     }
@@ -395,14 +492,37 @@ void SingleLL::render() {
           }
         }
       }
+      if (isRemoveTail && isCodeNext) {
+        if (!lineHighlight[2]) {
+          if (needUpdate) {
+            rect.update(2, 0.4);
+            needUpdate = false;
+          }
+          if (rect.getIsDone()) {
+            lineHighlight[2] = true;
+            lineHighlight[3] = false;
+            needUpdate = true;
+            isNodeNext = true;
+            isCodeNext = false;
+          }
+        } else if (!lineHighlight[3]) {
+          if (needUpdate) {
+            rect.update(3, 0.6);
+            needUpdate = false;
+          }
+          if (rect.getIsDone()) {
+            lineHighlight[3] = true;
+            lineHighlight[2] = false;
+            needUpdate = true;
+            isNodeNext = true;
+            isCodeNext = false;
+          }
+        }
+      }
       if (cur->guiNode.getIsDone() && shouldHighlight) {
         if (isNodeNext) {
           if (cur->next && !cur->next->guiNode.getHighlight() &&
               !cur->next->guiNode.getIsDone()) {
-            CustomLog(
-                LOG_INFO,
-                TextFormat("isDeleting = %d, index = %d", isDeleting, index),
-                0);
             if ((isSearching && cur->next->val == value[0]) ||
                 idx + 1 == index) {
               if (isUpdating) {
@@ -413,11 +533,8 @@ void SingleLL::render() {
               if (isSearching) {
                 cur->next->guiNode.setHighLightColor(GREEN);
               }
-              if (isDeleting) {
-                remove(index);
-                isDeleting = false;
-              }
-              cur->next->guiNode.setNewHighlight(2);
+              if (!isRemoveTail)
+                cur->next->guiNode.setNewHighlight(2);
               found = true;
               animDone = true;
             } else if (idx + 1 < index) {
@@ -546,20 +663,64 @@ void SingleLL::render() {
     }
   }
 
+  if (isRemoveTail && animDone) {
+    if (!lineHighlight[4]) {
+      if (needUpdate) {
+        rect.update(4, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[4] = true;
+        Node* tmp = head;
+        for (; tmp && tmp->next != tail; tmp = tmp->next)
+          ;
+        // CustomLog(LOG_INFO,
+        //           TextFormat("tail = %d, tmp = %d, tmp->next = %d", tail, tmp,
+        //                      tmp->next),
+        //           0);
+        tmp->guiNode.setShouldRenderArrow(false);
+        tail->guiNode.setIsLast(false);
+        lineHighlight[4] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[5]) {
+      if (needUpdate) {
+        rect.update(5, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[5] = true;
+        Node* tmp = head;
+        for (; tmp->next != tail; tmp = tmp->next)
+          ;
+        tmp->guiNode.setIsLast(true);
+        lineHighlight[5] = true;
+        needUpdate = true;
+      }
+    } else if (rect.getIsDone()) {
+      remove(index);
+    }
+  }
+
   if (animDone) {
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
       if (cur->next) {
         if (cur->next == tail && isAddToTail) {
         } else if (!isAddToIndex) {
-          cur->guiNode.setIsLast(false);
-          cur->guiNode.setShouldRenderArrow(true);
+          if (isRemoveTail && cur->next == tail) {
+            DrawText("cur", cur->guiNode.getCurPos().x + 10,
+                     cur->guiNode.getCurPos().y + 60, 20, textColor);
+          } else {
+            cur->guiNode.setIsLast(false);
+            cur->guiNode.setShouldRenderArrow(true);
+          }
         }
       }
       if (cur->guiNode.getIsDone())
         cur->guiNode.setHighLightColor(BLACK);
       cur->guiNode.setIsDone(false);
     }
-    if (!isAddToIndex)
+    if (!isAddToIndex && !isRemoveTail)
       index = -1;
   }
 }
@@ -674,6 +835,7 @@ void SingleLL::removeFromLL() {
     CustomLog(LOG_INFO, "founded", 0);
     if (found == head) {
       head = head->next;
+      isRemoveHead = false;
     } else {
       Node* prev = head;
       while (prev->next != found) {
@@ -682,6 +844,7 @@ void SingleLL::removeFromLL() {
       if (found == tail) {
         CustomLog(LOG_DEBUG, "found == tail", 0);
         CustomLog(LOG_DEBUG, TextFormat("%d", prev->val), 0);
+        isRemoveTail = false;
         tail = prev;
         tail->guiNode.setIsLast(true);
         tail->guiNode.setArrowNext({0, 0}, {0, 0});
