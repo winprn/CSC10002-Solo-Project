@@ -562,9 +562,9 @@ void SingleLL::render() {
     if (cur->guiNode.getIsRemove() || (!shouldMoveUp && idx == index) ||
         (!shouldMoveUp &&
          ((cur == tail && isAddToTail) || (cur == head && isAddToHead)))) {
-      cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y + 50});
+      cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y + 50});
     } else
-      cur->guiNode.setNewPos({(float)(50 + BASE_X * idx), BASE_Y});
+      cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y});
   }
   if (isAddToHead || isAddToTail) {
     if (!lineHighlight[0]) {
@@ -750,7 +750,7 @@ bool SingleLL::add(int val, int pos, bool hasAnimation) {
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  newNode->guiNode = GuiNode({(float)(50 + BASE_X * pos), BASE_Y + 50});
+  newNode->guiNode = GuiNode({(float)(BASE_X * pos), BASE_Y + 50});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
   newNode->guiNode.setShouldRenderArrow(false);

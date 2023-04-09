@@ -18,7 +18,7 @@ class GuiNode {
        isHighlighted = false, isDone = false, isRemove = false,
        isLengthChanged = false, isHead = false, shouldRenderArrow = false;
   Arrow arrNext, arrPrev;
-  Color highlightColor = BLACK;
+  Color highlightColor = Color({125, 126, 120, 255});
 
  public:
   GuiNode() {}
@@ -81,7 +81,9 @@ class GuiNode {
                ColorAlpha(textColor, curOpacity));
     }
     if (isHighlighted) {
-      DrawRectangleRounded(rect, 0.15, 20, Fade(highlightColor, curOpacity));
+      DrawRectangleRounded(rect, 0.12, 20, Fade(highlightColor, curOpacity));
+      DrawRectangleRoundedLines(rect, 0.12, 20, 2,
+                                Fade(primaryColor, curOpacity));
       DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                  Fade(WHITE, curOpacity));
       DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
@@ -96,13 +98,13 @@ class GuiNode {
         progress = 0;
       }
     } else {
-      DrawRectangleRounded(
-          rect, 0.15, 20,
+      DrawRectangleRoundedLines(
+          rect, 0.12, 20, 2,
           ColorAlpha(primaryColor, (unsigned char)(curOpacity * 255)));
       DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
-                 Fade(BLACK, curOpacity));
+                 Fade(primaryColor, curOpacity));
       DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
-               Fade(BLACK, curOpacity));
+               Fade(textColor, curOpacity));
     }
     if (shouldRenderArrow && !isRemove && arrNext.end.x != 0) {
       arrNext.render();
