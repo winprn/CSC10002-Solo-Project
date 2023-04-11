@@ -10,6 +10,7 @@ extern float BASE_X, BASE_Y;
 extern GuiFileDialogState fileDialogState;
 extern Color primaryColor, secondaryColor, accentColor, backgroundColor,
     textColor;
+extern int curScreen;
 }  // namespace Settings
 
 #endif

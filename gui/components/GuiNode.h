@@ -6,6 +6,7 @@
 #include "../../utils/Settings.h"
 #include "Arrow.h"
 #include <cmath>
+#include <cstring>
 
 using namespace Settings;
 
@@ -16,7 +17,9 @@ class GuiNode {
         curLength = 0, lineLength = 0, angle;
   bool isLast = false, isOutdated = false, isShifted = false,
        isHighlighted = false, isDone = false, isRemove = false,
-       isLengthChanged = false, isHead = false, shouldRenderArrow = false;
+       isLengthChanged = false, isHead = false, isSelected = false,
+       shouldRenderArrowNext = false, shouldRenderArrowPrev = false;
+  char text[20] = "";
   Arrow arrNext, arrPrev;
   Color highlightColor = Color({125, 126, 120, 255});
 
@@ -46,6 +49,15 @@ class GuiNode {
 
   Vector2 getArrow() { return arrNext.start; }
 
+  bool getIsClicked() {
+    if (CheckCollisionPointRec(GetMousePosition(),
+                               {curPos.x, curPos.y, 70, 50})) {
+      if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+        return true;
+    }
+    return false;
+  }
+
   void render(bool isHighlight = 0) {
     if (isOutdated) {
       if (newOpacity > 0)
@@ -73,24 +85,33 @@ class GuiNode {
 
     Rectangle rect = {curPos.x, curPos.y, 70, 50};
     if (isHead) {
-      DrawText("Head", curPos.x + 10, curPos.y - 20, 20,
-               ColorAlpha(textColor, curOpacity));
+      DrawTextEx(font_regular, "Head", {curPos.x + 10, curPos.y - 26}, 24, 1,
+                 ColorAlpha(textColor, curOpacity));
     }
     if (isLast) {
-      DrawText("Tail", curPos.x + 10, curPos.y - 20 + 70 * isHead, 20,
-               ColorAlpha(textColor, curOpacity));
+      DrawTextEx(font_regular, "Tail",
+                 {curPos.x + 10, curPos.y - 26 + 76 * isHead}, 24, 1,
+                 ColorAlpha(textColor, curOpacity));
     }
-    if (isHighlighted) {
+    if (strlen(text) > 0) {
+      DrawTextEx(font_regular, text, {curPos.x + 10, curPos.y + 50}, 24, 1,
+                 ColorAlpha(textColor, curOpacity));
+    }
+    if (isHighlighted || isSelected) {
       DrawRectangleRounded(rect, 0.12, 20, Fade(highlightColor, curOpacity));
       DrawRectangleRoundedLines(rect, 0.12, 20, 2,
                                 Fade(primaryColor, curOpacity));
       DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                  Fade(WHITE, curOpacity));
-      DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
-               Fade(WHITE, curOpacity));
-      DrawText("cur", curPos.x + 20, curPos.y + 66, 20,
-               ColorAlpha(textColor, curOpacity));
-      progress += 0.016;
+      DrawTextEx(font_bold, TextFormat("%d", val),
+                 {curPos.x + 20, curPos.y + 16}, 22, 1,
+                 Fade(textColor, curOpacity));
+      if (!isSelected) {
+        DrawTextEx(font_regular, "cur", {curPos.x + 20, curPos.y + 66}, 22, 1,
+                   ColorAlpha(textColor, curOpacity));
+      }
+      if (isHighlighted)
+        progress += 0.016;
       // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
       if (progress > highlight) {
         isDone = true;
@@ -103,11 +124,17 @@ class GuiNode {
           ColorAlpha(primaryColor, (unsigned char)(curOpacity * 255)));
       DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                  Fade(primaryColor, curOpacity));
-      DrawText(TextFormat("%d", val), curPos.x + 20, curPos.y + 16, 20,
-               Fade(textColor, curOpacity));
+      DrawTextEx(font_bold, TextFormat("%d", val),
+                 {curPos.x + 20, curPos.y + 16}, 22, 1,
+                 Fade(textColor, curOpacity));
     }
-    if (shouldRenderArrow && !isRemove && arrNext.end.x != 0) {
-      arrNext.render();
+    if (shouldRenderArrowNext && !isRemove) {
+      if (arrNext.end.x != 0)
+        arrNext.render();
+    }
+    if (shouldRenderArrowPrev && !isRemove) {
+      if (arrPrev.end.x != 0)
+        arrPrev.render();
     }
   }
 
@@ -159,11 +186,21 @@ class GuiNode {
 
   void setIsHead(bool isHead) { this->isHead = isHead; }
 
-  void setHighLightColor(Color color) { highlightColor = color; }
-
-  void setShouldRenderArrow(bool shouldRender) {
-    shouldRenderArrow = shouldRender;
+  void setHighLightColor(Color color = Color({125, 126, 120, 255})) {
+    highlightColor = color;
   }
+
+  void setShouldRenderArrowNext(bool shouldRender) {
+    shouldRenderArrowNext = shouldRender;
+  }
+
+  void setShouldRenderArrowPrev(bool shouldRender) {
+    shouldRenderArrowPrev = shouldRender;
+  }
+
+  void setText(const char* t) { strcpy(text, t); }
+
+  void setIsSelected(bool selected) { isSelected = selected; }
 };
 
 #endif

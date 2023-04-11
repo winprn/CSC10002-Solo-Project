@@ -11,3 +11,4 @@ Color Settings::secondaryColor = Color({164, 144, 124, 255});
 Color Settings::accentColor = Color({180, 210, 115, 255});
 Color Settings::backgroundColor = Color({39, 40, 34, 255});
 Color Settings::textColor = WHITE;
+int Settings::curScreen = 0;

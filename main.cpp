@@ -26,16 +26,21 @@ using namespace std;
 //   return false;
 // }
 
-void drawMenu(int& screen) {
+void drawMenu() {
   DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",
-             {266, 32}, 40, 1, Color({233, 236, 239, 255}));
+             {266, 32}, 48, 1, Color({233, 236, 239, 255}));
   DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06",
              {424, 98}, 24, 1, Color({233, 236, 239, 255}));
 
   MenuItem sll = MenuItem{
       {56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
+  MenuItem dll = MenuItem{
+      {475, 191, 330, 200}, "Doubly Linked List", "images/dll_menu.png"};
   if (sll.render()) {
-    screen = 1;
+    curScreen = 1;
+  }
+  if (dll.render()) {
+    curScreen = 2;
   }
 }
 
@@ -49,20 +54,22 @@ int main() {
   ll.add(10, 1);
   GuiLoadStyle("gui/styles.rgs");
   GuiLoadIcons("gui/iconset.rgi", NULL);
+  GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
   Arrow arr({50, 300}, {100, 360});
   bool ok = 0;
   CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
   // float angle = 30;
-  Settings::font_regular = LoadFontEx("gui/Roboto-Regular.ttf", 100, NULL, 0);
-  Settings::font_bold = LoadFontEx("gui/Roboto-Bold.ttf", 100, NULL, 0);
-  int screen = 0;
+  Settings::font_regular =
+      LoadFontEx("gui/IBMPlexSerif-Regular.ttf", 96, NULL, 0);
+  Settings::font_bold =
+      LoadFontEx("gui/IBMPlexSerif-Bold.ttf", 96, NULL, 0);
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(backgroundColor);
 
-    switch (screen) {
+    switch (curScreen) {
       case 0:
-        drawMenu(screen);
+        drawMenu();
         break;
       case 1:
         ll.render();
