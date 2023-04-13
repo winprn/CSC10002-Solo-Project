@@ -29,6 +29,7 @@ class SingleLL {
   int value[10] = {0}, index = -1, randomSize = 0, newVal = -1,
       currentIndex = -1;
   float time = 0;
+  double errStartTime = 0;
   char input[10][10] = {""}, *fileData = nullptr, filePath[512] = {0};
   const char* options = "ADD;DELETE;SEARCH";
   HighlightRectangle rect;

@@ -75,7 +75,7 @@ class GuiNode {
       double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
       curPos.x += dx / 30;
       curPos.y += dy / 30;
-      arrNext.start = {curPos.x + 60, curPos.y + 25};
+      // arrNext.start = {curPos.x + 60, curPos.y + 25};
 
       if (fabs(dx) <= 0.05 && fabs(dy) <= 0.05) {
         curPos = newPos;

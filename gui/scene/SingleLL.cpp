@@ -7,7 +7,9 @@
 #include "../components/GuiNode.h"
 #include "../components/InputBox.h"
 
+#include <chrono>
 #include <string>
+#include <thread>
 using namespace std;
 using namespace Settings;
 
@@ -21,35 +23,39 @@ void SingleLL::render() {
     curScreen = 0;
   }
 
-  if (GuiButton({100, 415, 100, 40}, "Create")) {
+  DrawRectangleRounded({80, 335, 160, 310}, 0.12, 20, backgroundColor2);
+  DrawRectangleRoundedLines({80, 335, 160, 310}, 0.12, 20, 2,
+                            ColorAlpha(textColor, 0.6));
+
+  if (GuiButton({110, 350, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;
   }
-  if (GuiButton({100, 475, 100, 40}, "Add")) {
+  if (GuiButton({110, 410, 100, 40}, "Add")) {
     reset();
     showAddButtons = true;
   }
-  if (GuiButton({100, 535, 100, 40}, "Delete")) {
+  if (GuiButton({110, 470, 100, 40}, "Delete")) {
     reset();
     showDeleteButtons = true;
   }
-  if (GuiButton({100, 595, 100, 40}, "Search")) {
+  if (GuiButton({110, 530, 100, 40}, "Search")) {
     reset();
     showSearchButtons = true;
   }
-  if (GuiButton({100, 655, 100, 40}, "Update")) {
+  if (GuiButton({110, 590, 100, 40}, "Update")) {
     reset();
     showUpdateButtons = true;
   }
 
   if (showAddButtons) {
-    if (GuiButton({280, 475, 100, 40}, "Add to head")) {
+    if (GuiButton({280, 410, 100, 40}, "Add to head")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[0] = true;
     }
     if (showInputBox[0]) {
-      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({280, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         index = 1;
         isAddToHead = true;
@@ -59,13 +65,13 @@ void SingleLL::render() {
         strcpy(input[0], "");
       }
     }
-    if (GuiButton({400, 475, 100, 40}, "Add to tail")) {
+    if (GuiButton({400, 410, 100, 40}, "Add to tail")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[1] = true;
     }
     if (showInputBox[1]) {
-      if (DrawInputBox({400, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({400, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         index = getSize() + 1;
         isAddToTail = true;
@@ -77,15 +83,15 @@ void SingleLL::render() {
         strcpy(input[0], "");
       }
     }
-    if (GuiButton({520, 475, 100, 40}, "Add to index")) {
+    if (GuiButton({520, 410, 100, 40}, "Add to index")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       showInputBox[2] = true;
     }
     if (showInputBox[2]) {
-      if (DrawInputBox({520, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({520, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         if (currentIndex == -1) {
-
+          errStartTime = GetTime();
         } else {
           index = currentIndex;
           isAddToIndex = true;
@@ -104,7 +110,7 @@ void SingleLL::render() {
     }
   }
   if (showDeleteButtons) {
-    if (GuiButton({280, 535, 100, 40}, "Delete head")) {
+    if (GuiButton({280, 470, 100, 40}, "Delete head")) {
       index = 1;
       isRemoveHead = true;
       animDone = false;
@@ -112,7 +118,7 @@ void SingleLL::render() {
       needUpdate = true;
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
-    if (GuiButton({400, 535, 100, 40}, "Delete tail")) {
+    if (GuiButton({400, 470, 100, 40}, "Delete tail")) {
       index = getSize();
       isDeleting = true;
       shouldHighlight = false;
@@ -121,9 +127,9 @@ void SingleLL::render() {
       animDone = false;
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
-    if (GuiButton({520, 535, 100, 40}, "Delete at index")) {
+    if (GuiButton({520, 470, 100, 40}, "Delete at index")) {
       if (currentIndex == -1) {
-
+        errStartTime = GetTime();
       } else {
         index = currentIndex;
         isRemoveIndex = true;
@@ -139,7 +145,7 @@ void SingleLL::render() {
     }
   }
   if (showSearchButtons) {
-    if (DrawInputBox({240, 595, 50, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({250, 530, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_LENS)) {
       index = value[0];
       isSearching = true;
@@ -152,20 +158,23 @@ void SingleLL::render() {
     }
   }
   if (showUpdateButtons) {
-    if (DrawInputBox({240, 655, 50, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({250, 590, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_REPEAT_FILL)) {
       if (currentIndex == -1) {
-
+        errStartTime = GetTime();
       } else {
         index = currentIndex;
         newVal = value[0];
-        isNodeNext = true;
+        isUpdating = true;
+        shouldHighlight = false;
+        needUpdate = true;
+        animDone = false;
         currentIndex = -1;
         memset(showInputBox, 0, sizeof(showInputBox));
         memset(selected, 0, sizeof(selected));
+        memset(lineHighlight, 0, sizeof(lineHighlight));
         strcpy(input[0], "");
         strcpy(input[1], "");
-        update();
       }
     }
   }
@@ -212,6 +221,12 @@ void SingleLL::render() {
     Texture2D texture = LoadTextureFromImage(img);
     DrawTexture(texture, 895, 490, WHITE);
   }
+  if (isUpdating) {
+    Image img = LoadImage("images/SLL/update.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
   if (!shouldHighlight && isSearching) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
@@ -242,7 +257,7 @@ void SingleLL::render() {
   // CustomLog(LOG_INFO,
   //           TextFormat("2lai = %d, index = %d", shouldHighlight, isAddToIndex),
   //           0);
-  if (!shouldHighlight && isAddToIndex) {
+  if (!shouldHighlight && (isAddToIndex || isUpdating)) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
         rect.update(0, 1);
@@ -347,6 +362,7 @@ void SingleLL::render() {
         head->guiNode.setIsHead(false);
       }
       if (rect.getPos() > 2) {
+        isRemoveHead = false;
         remove(index);
         index = -1;
       }
@@ -389,7 +405,8 @@ void SingleLL::render() {
            cur->next->guiNode.getCurPos().y + 25});
     }
     // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
-    if ((isSearching || isAddToIndex || (isRemoveTail && cur->next != tail) ||
+    if ((isSearching || isAddToIndex || isUpdating ||
+         (isRemoveTail && cur->next != tail) ||
          (isRemoveIndex && idx + 1 != index)) &&
         cur->guiNode.getProgress() >= 0.5) {
       isCodeNext = true;
@@ -424,7 +441,7 @@ void SingleLL::render() {
           }
         }
       }
-      if (isAddToIndex && isCodeNext) {
+      if ((isAddToIndex || isUpdating) && isCodeNext) {
         if (!lineHighlight[1]) {
           if (needUpdate) {
             // CustomLog(LOG_DEBUG, "updated line 2", 0);
@@ -485,11 +502,6 @@ void SingleLL::render() {
               !cur->next->guiNode.getIsDone()) {
             if ((isSearching && cur->next->val == value[0]) ||
                 idx + 1 == index) {
-              if (isUpdating) {
-                cur->next->guiNode.setVal(newVal);
-                cur->next->guiNode.setHighLightColor(GREEN);
-                isUpdating = false;
-              }
               if (isSearching) {
                 cur->next->guiNode.setHighLightColor(GREEN);
               }
@@ -700,6 +712,24 @@ void SingleLL::render() {
     }
   }
 
+  if (isUpdating && animDone) {
+    if (!lineHighlight[3]) {
+      if (needUpdate) {
+        rect.update(3, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        Node* tmp = head;
+        int idx = 1;
+        for (; tmp && idx != index; tmp = tmp->next, idx++)
+          ;
+        tmp->guiNode.setVal(newVal);
+        tmp->val = newVal;
+        isUpdating = false;
+      }
+    }
+  }
+
   if (animDone) {
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
       if (cur->next) {
@@ -718,14 +748,14 @@ void SingleLL::render() {
         cur->guiNode.setHighLightColor();
       cur->guiNode.setIsDone(false);
     }
-    if (!isAddToIndex && !isRemoveTail && !isRemoveIndex)
+    if (!isAddToIndex && !isRemoveTail && !isRemoveIndex && !isUpdating)
       index = -1;
   }
   if (showCreateButtons) {
-    if (GuiButton({280, 415, 100, 40}, "Random")) {
+    if (GuiButton({280, 350, 100, 40}, "Random")) {
       createRandomList();
     }
-    if (GuiButton({400, 415, 100, 40}, "From file")) {
+    if (GuiButton({400, 350, 100, 40}, "From file")) {
       fileDialogState.windowActive = true;
     }
     if (fileDialogState.windowActive)
@@ -740,6 +770,9 @@ void SingleLL::render() {
       fileDialogState.SelectFilePressed = false;
     }
     GuiFileDialog(&fileDialogState);
+  }
+  if (GetTime() - errStartTime < 2 && errStartTime > 0) {
+    DrawTextEx(font_bold, "Please select a node", {50, 250}, 22, 1, textColor);
   }
 }
 
@@ -919,6 +952,7 @@ void SingleLL::setIsLast() {
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     if (cur->next) {
       cur->guiNode.setIsLast(false);
+      cur->guiNode.setShouldRenderArrowNext(true);
     }
   }
 }

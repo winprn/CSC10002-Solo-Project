@@ -8,9 +8,10 @@ namespace Settings {
 extern Font font_regular, font_bold;
 extern float BASE_X, BASE_Y;
 extern GuiFileDialogState fileDialogState;
-extern Color primaryColor, secondaryColor, accentColor, backgroundColor,
-    textColor;
+extern Color primaryColor, secondaryColor, accentColor, accentColor2,
+    backgroundColor, backgroundColor2, textColor;
 extern int curScreen;
+extern bool colorUpdated;
 }  // namespace Settings
 
 #endif

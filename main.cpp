@@ -2,8 +2,11 @@
 #include "gui/components/Arrow.h"
 #include "gui/components/GuiNode.h"
 #include "gui/components/MenuItem.h"
+#include "gui/scene/CircularLL.h"
 #include "gui/scene/DoublyLL.h"
+#include "gui/scene/SettingScreen.h"
 #include "gui/scene/SingleLL.h"
+#include "gui/scene/Stack.h"
 #include "lib/raygui.h"
 #include "lib/raylib.h"
 #include "utils/Log.h"
@@ -12,20 +15,6 @@
 
 using namespace std;
 
-// bool drawRectangleMenu(Rectangle rect, char *text, char *imgPath) {
-//   Image img = LoadImage(imgPath);
-//   // read image from file and draw it
-//   DrawRectangleRounded(rect, 0.05, 20, Color({233, 236, 239, 255}));
-//   Texture2D texture = LoadTextureFromImage(img);
-//   DrawTexture(texture, rect.x, rect.y, WHITE);
-
-//   DrawTextEx(Settings::font, text, {rect.x + 84, rect.y + 164}, 20, 1, Color({0, 0, 0, 255}));
-//   // ImageDrawRectangle(&img, rect.x, rect.y, rect.width, rect.height, Color({233, 236, 239, 255}));
-//   if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect)) return true;
-
-//   return false;
-// }
-
 void drawMenu() {
   DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",
              {266, 32}, 48, 1, Color({233, 236, 239, 255}));
@@ -33,43 +22,60 @@ void drawMenu() {
              {424, 98}, 24, 1, Color({233, 236, 239, 255}));
 
   MenuItem sll = MenuItem{
-      {56, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
+      {55, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
   MenuItem dll = MenuItem{
       {475, 191, 330, 200}, "Doubly Linked List", "images/dll_menu.png"};
-  if (sll.render()) {
+  MenuItem cll = MenuItem{
+      {895, 191, 330, 200}, "Circular Linked List", "images/cll_menu.png"};
+  MenuItem stack =
+      MenuItem{{55, 440, 330, 200}, "Stack", "images/stack_menu.png"};
+  if (sll.render())
     curScreen = 1;
-  }
-  if (dll.render()) {
+  if (dll.render())
     curScreen = 2;
+  if (cll.render())
+    curScreen = 3;
+  if (stack.render())
+    curScreen = 4;
+}
+
+void drawSettingButton() {
+  if (GuiButton({1173, 30, 50, 50}, GuiIconText(140, ""), true)) {
+    curScreen = 5;
   }
 }
 
 int main() {
   SetTraceLogCallback(CustomLog);
-  InitWindow(1280, 720, "testss");
+  InitWindow(1280, 720, "VisuAlgo in C++");
   SetTargetFPS(60);
   SingleLL ll;
   DoublyLL dll;
-  // ll.getRandom();
-  ll.add(10, 1);
+  CircularLL cll;
+  Stack st;
+  SettingScreen setting;
+  ll.createRandomList(), dll.createRandomList(), cll.createRandomList(),
+      st.createRandomList();
   GuiLoadStyle("gui/styles.rgs");
   GuiLoadIcons("gui/iconset.rgi", NULL);
   GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+  GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(WHITE));
   Arrow arr({50, 300}, {100, 360});
   bool ok = 0;
-  CustomLog(LOG_DEBUG, TextFormat("%d", ll.getHead()), 0);
-  // float angle = 30;
   Settings::font_regular =
       LoadFontEx("gui/IBMPlexSerif-Regular.ttf", 96, NULL, 0);
-  Settings::font_bold =
-      LoadFontEx("gui/IBMPlexSerif-Bold.ttf", 96, NULL, 0);
+  Settings::font_bold = LoadFontEx("gui/IBMPlexSerif-Bold.ttf", 96, NULL, 0);
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(backgroundColor);
 
+    GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(accentColor));
+    GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(accentColor2));
+    GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(accentColor2));
     switch (curScreen) {
       case 0:
         drawMenu();
+        drawSettingButton();
         break;
       case 1:
         ll.render();
@@ -77,14 +83,16 @@ int main() {
       case 2:
         dll.render();
         break;
+      case 3:
+        cll.render();
+        break;
+      case 4:
+        st.render();
+        break;
+      case 5:
+        setting.render();
+        break;
     }
-    // Vector2 curPos{50, 500};
-    // DrawTriangle({curPos.x + 130, curPos.y + 25}, {curPos.x + 120 + 20 * cos(PI/4) * tan(angle * PI / 180), curPos.y + 15}, {curPos.x + 120, curPos.y + 35 - 20 * cos(PI/4) * tan(angle * PI / 180)}, Fade(BLACK, 1.0));
-    // angle -= 0.5;
-    // if (angle < 0) {
-    //   angle = 0;
-    // }
-
     EndDrawing();
   }
 

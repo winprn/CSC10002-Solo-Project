@@ -1,4 +1,4 @@
-#include "DoublyLL.h"
+#include "CircularLL.h"
 #include "../../lib/gui_file_dialog.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
@@ -7,16 +7,18 @@
 #include "../components/GuiNode.h"
 #include "../components/InputBox.h"
 
+#include <chrono>
 #include <string>
+#include <thread>
 using namespace std;
 using namespace Settings;
 
-void DoublyLL::render() {
+void CircularLL::render() {
   ClearBackground(backgroundColor);
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  DrawTextEx(font_bold, "Doubly Linked List", {501, 31}, 40, 1, WHITE);
+  DrawTextEx(font_bold, "Circular Linked List", {501, 31}, 40, 1, WHITE);
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }
@@ -82,44 +84,24 @@ void DoublyLL::render() {
       showInputBox[2] = true;
     }
     if (showInputBox[2]) {
-      if (GuiTextBox({520, 535, 30, 30}, input[0], 10, enableInput[0]) &&
-          strlen(input[0])) {
-        int id = atoi(input[0]);
-        value[0] = id;
-      }
-      if (IsMouseButtonDown(0)) {
-        if (CheckCollisionPointRec(
-                (Vector2){(float)GetMouseX(), (float)GetMouseY()},
-                {520, 535, 30, 30})) {
-          enableInput[0] = true;
-        } else
-          enableInput[0] = false;
-      }
-      if (GuiTextBox({555, 535, 30, 30}, input[1], 10, enableInput[1]) &&
-          strlen(input[1])) {
-        int id = atoi(input[1]);
-        value[1] = id;
-      }
-      if (IsMouseButtonDown(0)) {
-        if (CheckCollisionPointRec(
-                (Vector2){(float)GetMouseX(), (float)GetMouseY()},
-                {555, 535, 30, 30})) {
-          enableInput[1] = true;
-        } else
-          enableInput[1] = false;
-      }
-      if (GuiButton({590, 535, 30, 30}, GuiIconText(ICON_PLUS, ""))) {
-        index = value[0];
-        isAddToIndex = true;
-        shouldHighlight = false;
-        shouldMoveUp = false;
-        needUpdate = true;
-        animDone = false;
-        memset(lineHighlight, 0, sizeof(lineHighlight));
-        add(value[1], value[0], 0);
-        showInputBox[2] = false;
-        strcpy(input[0], "");
-        strcpy(input[1], "");
+      if (DrawInputBox({520, 535, 60, 30}, "", input[0], value[0],
+                       enableInput[0], ICON_PLUS)) {
+        if (currentIndex == -1) {
+          errStartTime = GetTime();
+        } else {
+          index = currentIndex;
+          isAddToIndex = true;
+          shouldHighlight = false;
+          shouldMoveUp = false;
+          needUpdate = true;
+          animDone = false;
+          currentIndex = -1;
+          memset(lineHighlight, 0, sizeof(lineHighlight));
+          memset(selected, 0, sizeof(selected));
+          add(value[0], index, 0);
+          showInputBox[2] = false;
+          strcpy(input[0], "");
+        }
       }
     }
   }
@@ -142,14 +124,17 @@ void DoublyLL::render() {
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
     if (GuiButton({520, 535, 100, 40}, "Delete at index")) {
-      memset(showInputBox, 0, sizeof(showInputBox));
-      showInputBox[0] = true;
-    }
-    if (showInputBox[0]) {
-      if (DrawInputBox({520, 595, 60, 30}, "", input[0], value[0],
-                       enableInput[0], ICON_MINUS)) {
-        index = value[0];
-        remove(index);
+      if (currentIndex == -1) {
+        errStartTime = GetTime();
+      } else {
+        index = currentIndex;
+        isRemoveIndex = true;
+        shouldHighlight = false;
+        needUpdate = true;
+        animDone = false;
+        currentIndex = -1;
+        memset(lineHighlight, 0, sizeof(lineHighlight));
+        memset(selected, 0, sizeof(selected));
         showInputBox[1] = false;
         strcpy(input[0], "");
       }
@@ -169,46 +154,23 @@ void DoublyLL::render() {
     }
   }
   if (showUpdateButtons) {
-    // if(DrawInputBox({240, 655, 50, 30}, "", input[0], value[0], enableInput[0], ICON_REPEAT_FILL)) {
-    //   memset(showInputBox, 0, sizeof(showInputBox));
-    //   showInputBox[0] = true;
-    // }
-    if (GuiTextBox({240, 655, 30, 30}, input[0], 10, enableInput[0]) &&
-        strlen(input[0])) {
-      int id = atoi(input[0]);
-      value[0] = id;
-    }
-    if (IsMouseButtonDown(0)) {
-      if (CheckCollisionPointRec(
-              (Vector2){(float)GetMouseX(), (float)GetMouseY()},
-              {240, 655, 30, 30})) {
-        enableInput[0] = true;
-      } else
-        enableInput[0] = false;
-    }
-    if (GuiTextBox({275, 655, 30, 30}, input[1], 10, enableInput[1]) &&
-        strlen(input[1])) {
-      int id = atoi(input[1]);
-      value[1] = id;
-    }
-    if (IsMouseButtonDown(0)) {
-      if (CheckCollisionPointRec(
-              (Vector2){(float)GetMouseX(), (float)GetMouseY()},
-              {275, 655, 30, 30})) {
-        enableInput[1] = true;
-      } else
-        enableInput[1] = false;
-    }
-    if (GuiButton({310, 655, 30, 30}, GuiIconText(ICON_REPEAT_FILL, ""))) {
-      index = value[0];
-      newVal = value[1];
-      // CustomLog(LOG_INFO, TextFormat("%d", newVal), 0);
-      isNodeNext = true;
-      update();
-      // add(value[1], value[0]);
-      showInputBox[2] = false;
-      strcpy(input[0], "");
-      strcpy(input[1], "");
+    if (DrawInputBox({240, 655, 50, 30}, "", input[0], value[0], enableInput[0],
+                     ICON_REPEAT_FILL)) {
+      if (currentIndex == -1) {
+        errStartTime = GetTime();
+      } else {
+        index = currentIndex;
+        newVal = value[0];
+        isUpdating = true;
+        shouldHighlight = false;
+        needUpdate = true;
+        animDone = false;
+        currentIndex = -1;
+        memset(showInputBox, 0, sizeof(showInputBox));
+        memset(selected, 0, sizeof(selected));
+        strcpy(input[0], "");
+        strcpy(input[1], "");
+      }
     }
   }
 
@@ -248,6 +210,18 @@ void DoublyLL::render() {
     Texture2D texture = LoadTextureFromImage(img);
     DrawTexture(texture, 895, 490, WHITE);
   }
+  if (isRemoveIndex) {
+    Image img = LoadImage("images/SLL/remove_index.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
+  if (isUpdating) {
+    Image img = LoadImage("images/SLL/update.png");
+    // read image from file and draw it
+    Texture2D texture = LoadTextureFromImage(img);
+    DrawTexture(texture, 895, 490, WHITE);
+  }
   if (!shouldHighlight && isSearching) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
@@ -278,7 +252,7 @@ void DoublyLL::render() {
   // CustomLog(LOG_INFO,
   //           TextFormat("2lai = %d, index = %d", shouldHighlight, isAddToIndex),
   //           0);
-  if (!shouldHighlight && isAddToIndex) {
+  if (!shouldHighlight && (isAddToIndex || isUpdating)) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
         rect.update(0, 1);
@@ -335,7 +309,7 @@ void DoublyLL::render() {
       }
     }
   }
-  if (!shouldHighlight && isRemoveTail) {
+  if (!shouldHighlight && (isRemoveTail || isRemoveIndex)) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
         rect.update(0, 1);
@@ -403,26 +377,36 @@ void DoublyLL::render() {
           cur->guiNode.setIsLast(true);
       }
     }
-    cur->guiNode.render();
-    if (cur->next && !cur->guiNode.getIsLast()) {
-      cur->guiNode.setShouldRenderArrowNext(true);
-      cur->guiNode.setArrowNext(
-          {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 35},
-          {cur->next->guiNode.getCurPos().x,
-           cur->next->guiNode.getCurPos().y + 35});
+    if (cur->guiNode.getIsClicked()) {
+      bool tmp = selected[idx];
+      memset(selected, false, sizeof(selected));
+      selected[idx] = !tmp;
+      if (!selected[idx])
+        currentIndex = -1;
     }
-    if (cur->prev) {
-      cur->guiNode.setShouldRenderArrowPrev(true);
-      cur->guiNode.setArrowPrev(
-          {cur->guiNode.getCurPos().x, cur->guiNode.getCurPos().y + 15},
-          {cur->prev->guiNode.getCurPos().x + 60,
-           cur->prev->guiNode.getCurPos().y + 15});
-    } else {
-      cur->guiNode.setShouldRenderArrowPrev(false);
-      cur->guiNode.setArrowPrev({0, 0}, {0, 0});
+    if (selected[idx]) {
+      cur->guiNode.setIsSelected(true);
+      currentIndex = idx;
+    } else
+      cur->guiNode.setIsSelected(false);
+    cur->guiNode.render();
+    if (cur->guiNode.getIsRemove())
+      continue;
+    if (cur->next && !cur->guiNode.getIsLast()) {
+      cur->guiNode.setArrowNext(
+          {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
+          {cur->next->guiNode.getCurPos().x,
+           cur->next->guiNode.getCurPos().y + 25});
+    }
+    if (cur == tail) {
+      cur->guiNode.setArrowNext(
+          {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
+          {head->guiNode.getCurPos().x + 25, head->guiNode.getCurPos().y + 50});
     }
     // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
-    if ((isSearching || isAddToIndex || (isRemoveTail && cur->next != tail)) &&
+    if ((isSearching || isAddToIndex || isUpdating ||
+         (isRemoveTail && cur->next != tail) ||
+         (isRemoveIndex && idx + 1 != index)) &&
         cur->guiNode.getProgress() >= 0.5) {
       isCodeNext = true;
       isNodeNext = false;
@@ -456,7 +440,7 @@ void DoublyLL::render() {
           }
         }
       }
-      if (isAddToIndex && isCodeNext) {
+      if ((isAddToIndex || isUpdating) && isCodeNext) {
         if (!lineHighlight[1]) {
           if (needUpdate) {
             // CustomLog(LOG_DEBUG, "updated line 2", 0);
@@ -484,7 +468,7 @@ void DoublyLL::render() {
           }
         }
       }
-      if (isRemoveTail && isCodeNext) {
+      if ((isRemoveTail || isRemoveIndex) && isCodeNext) {
         if (!lineHighlight[2]) {
           if (needUpdate) {
             rect.update(2, 0.4);
@@ -517,15 +501,10 @@ void DoublyLL::render() {
               !cur->next->guiNode.getIsDone()) {
             if ((isSearching && cur->next->val == value[0]) ||
                 idx + 1 == index) {
-              if (isUpdating) {
-                cur->next->guiNode.setVal(newVal);
-                cur->next->guiNode.setHighLightColor(GREEN);
-                isUpdating = false;
-              }
               if (isSearching) {
                 cur->next->guiNode.setHighLightColor(GREEN);
               }
-              if (!isRemoveTail)
+              if (!isRemoveTail && !isRemoveIndex)
                 cur->next->guiNode.setNewHighlight(2);
               found = true;
               animDone = true;
@@ -694,28 +673,78 @@ void DoublyLL::render() {
     }
   }
 
+  if (isRemoveIndex && animDone) {
+    if (!lineHighlight[4]) {
+      if (needUpdate) {
+        rect.update(4, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[4] = true;
+        Node* tmp = head;
+        int idx = 1;
+        for (; tmp && idx + 1 != index; tmp = tmp->next, idx++)
+          ;
+        tmp->guiNode.setText("pre");
+        tmp->next->next->guiNode.setText("aft");
+        lineHighlight[4] = true;
+        needUpdate = true;
+      }
+    } else if (!lineHighlight[5]) {
+      if (needUpdate) {
+        rect.update(5, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        lineHighlight[5] = true;
+        lineHighlight[5] = true;
+        needUpdate = true;
+      }
+    } else if (rect.getIsDone()) {
+      Node* tmp = head;
+      int idx = 1;
+      for (; tmp && idx + 1 != index; tmp = tmp->next, idx++)
+        ;
+      tmp->guiNode.setText("");
+      tmp->next->next->guiNode.setText("");
+      remove(index);
+    }
+  }
+
+  if (isUpdating && animDone) {
+    if (!lineHighlight[3]) {
+      if (needUpdate) {
+        rect.update(3, 1);
+        needUpdate = false;
+      }
+      if (rect.getIsDone()) {
+        Node* tmp = head;
+        int idx = 1;
+        for (; tmp && idx != index; tmp = tmp->next, idx++)
+          ;
+        tmp->guiNode.setVal(newVal);
+        isUpdating = false;
+      }
+    }
+  }
+
   if (animDone) {
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
-      if (cur->next) {
-        if (cur->next == tail && isAddToTail) {
-        } else if (!isAddToIndex) {
-          if (isRemoveTail && cur->next == tail) {
-            DrawText("cur", cur->guiNode.getCurPos().x + 10,
-                     cur->guiNode.getCurPos().y + 60, 20, textColor);
-          } else {
-            cur->guiNode.setIsLast(false);
-            cur->guiNode.setShouldRenderArrowNext(true);
-          }
+      if (cur->next == tail && isAddToTail) {
+      } else if (!isAddToIndex) {
+        if (isRemoveTail && cur->next == tail) {
+          DrawText("cur", cur->guiNode.getCurPos().x + 10,
+                   cur->guiNode.getCurPos().y + 60, 20, textColor);
+        } else {
+          cur->guiNode.setIsLast(false);
+          cur->guiNode.setShouldRenderArrowNext(true);
         }
       }
-      if (cur->prev) {
-        cur->guiNode.setShouldRenderArrowPrev(true);
-      }
       if (cur->guiNode.getIsDone())
-        cur->guiNode.setHighLightColor(BLACK);
+        cur->guiNode.setHighLightColor();
       cur->guiNode.setIsDone(false);
     }
-    if (!isAddToIndex && !isRemoveTail)
+    if (!isAddToIndex && !isRemoveTail && !isRemoveIndex && !isUpdating)
       index = -1;
   }
   if (showCreateButtons) {
@@ -738,9 +767,12 @@ void DoublyLL::render() {
     }
     GuiFileDialog(&fileDialogState);
   }
+  if (GetTime() - errStartTime < 2 && errStartTime > 0) {
+    DrawTextEx(font_bold, "Please select a node", {50, 250}, 22, 1, textColor);
+  }
 }
 
-int DoublyLL::getSize() {
+int CircularLL::getSize() {
   int sz = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     sz++;
@@ -748,13 +780,13 @@ int DoublyLL::getSize() {
   return sz;
 }
 
-int DoublyLL::getHead() {
+int CircularLL::getHead() {
   if (head == nullptr)
     return 123;
   return head->val;
 }
 
-bool DoublyLL::add(int val, int pos, bool hasAnimation) {
+bool CircularLL::add(int val, int pos, bool hasAnimation) {
   if (getSize() >= 10)
     return false;
   // if (pos)
@@ -772,8 +804,6 @@ bool DoublyLL::add(int val, int pos, bool hasAnimation) {
 
   if (pos == 1) {
     newNode->next = head;
-    if (head)
-      head->prev = newNode;
     head = newNode;
     if (getSize() == 1) {
       tail = newNode;
@@ -789,7 +819,6 @@ bool DoublyLL::add(int val, int pos, bool hasAnimation) {
         // CustomLog(LOG_ERROR, "hihihi", 0);
       } else {
         tail->next = newNode;
-        newNode->prev = tail;
         // tail->guiNode.setIsRotateArrow(true);
         tail = newNode;
         tail->guiNode.setIsLast(true);
@@ -801,8 +830,6 @@ bool DoublyLL::add(int val, int pos, bool hasAnimation) {
       if (idx + 1 == pos) {
         cur->guiNode.setShouldRenderArrowNext(false);
         newNode->next = cur->next;
-        newNode->prev = cur->prev;
-        cur->prev = newNode;
         cur->next = newNode;
         break;
       }
@@ -814,14 +841,14 @@ bool DoublyLL::add(int val, int pos, bool hasAnimation) {
   return true;
 }
 
-void DoublyLL::getRandom() {
+void CircularLL::getRandom() {
   randomSize = max(1, rand() % 11);
   while (randomSize--) {
     add(rand() % 100, getSize() + 1, false);
   }
 }
 
-void DoublyLL::remove(int id) {
+void CircularLL::remove(int id) {
   int idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
@@ -829,14 +856,11 @@ void DoublyLL::remove(int id) {
       cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y + 50});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
-      if (cur->next) {
-        cur->next->guiNode.setShouldRenderArrowPrev(false);
-      }
     }
   }
 }
 
-void DoublyLL::removeAll() {
+void CircularLL::removeAll() {
   while (head != nullptr) {
     Node* tmp = head;
     head = head->next;
@@ -844,7 +868,7 @@ void DoublyLL::removeAll() {
   }
 }
 
-void DoublyLL::removeFromLL() {
+void CircularLL::removeFromLL() {
   Node* found = nullptr;
   int idx = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
@@ -858,7 +882,6 @@ void DoublyLL::removeFromLL() {
     CustomLog(LOG_INFO, "founded", 0);
     if (found == head) {
       head = head->next;
-      head->prev = nullptr;
       isRemoveHead = false;
     } else {
       Node* prev = head;
@@ -872,22 +895,22 @@ void DoublyLL::removeFromLL() {
         tail = prev;
         tail->guiNode.setIsLast(true);
         tail->guiNode.setArrowNext({0, 0}, {0, 0});
-      } else
-        found->next->prev = prev;
+      }
+      isRemoveIndex = false;
       prev->next = found->next;
     }
     delete found;
   }
 }
 
-void DoublyLL::animate() {
+void CircularLL::animate() {
   if (head == nullptr)
     return;
   head->guiNode.setNewHighlight(1);
   animDone = false;
 }
 
-void DoublyLL::search(int val) {
+void CircularLL::search(int val) {
   CustomLog(LOG_DEBUG, "inside search", 0);
   if (head == nullptr)
     return;
@@ -895,7 +918,7 @@ void DoublyLL::search(int val) {
   animDone = false;
 }
 
-void DoublyLL::reset() {
+void CircularLL::reset() {
   showCreateButtons = false;
   showAddButtons = false;
   showDeleteButtons = false;
@@ -904,13 +927,13 @@ void DoublyLL::reset() {
   memset(showInputBox, 0, sizeof(showInputBox));
 }
 
-void DoublyLL::createRandomList() {
+void CircularLL::createRandomList() {
   removeAll();
   getRandom();
   setIsLast();
 }
 
-void DoublyLL::addFromFile() {
+void CircularLL::addFromFile() {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");
@@ -921,16 +944,15 @@ void DoublyLL::addFromFile() {
   setIsLast();
 }
 
-void DoublyLL::setIsLast() {
+void CircularLL::setIsLast() {
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     if (cur->next) {
       cur->guiNode.setIsLast(false);
-      cur->guiNode.setShouldRenderArrowNext(true);
     }
   }
 }
 
-void DoublyLL::update() {
+void CircularLL::update() {
   isUpdating = true;
   animate();
 }

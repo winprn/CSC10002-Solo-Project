@@ -3,7 +3,7 @@
 #include "raylib.h"
 
 class Node {
-    int curX, curY;
+  int curX, curY;
 };
 
 #endif

@@ -35,11 +35,24 @@ class Arrow {
 
   void render() {
     // draw a line
-    DrawLineEx(start, end, 2, textColor);
+    if (abs(start.x - end.x) < 80)
+      DrawLineEx(start, end, 2, textColor);
+    else {
+      DrawLineEx(start, {start.x + 20, start.y}, 2, textColor);
+      DrawLineEx({start.x + 20, start.y}, {start.x + 20, start.y + 55}, 2,
+                 textColor);
+      DrawLineEx({start.x + 20, start.y + 55}, {end.x, end.y + 30}, 2,
+                 textColor);
+      DrawLineEx({end.x, end.y + 30}, end, 2, textColor);
+    }
 
     // get the first point of the triangle, which is the end of the line
     Vector2 p1 = end;
-    Vector2 tmp = Vector2MoveTowards(end, start, 10);
+    Vector2 tmp = {0, 0};
+    if (abs(start.x - end.x) < 80)
+      tmp = Vector2MoveTowards(end, start, 10);
+    else
+      tmp = Vector2MoveTowards(end, {end.x, end.y + 10}, 10);
     double dist = Vector2Distance(tmp, p1);
     // CustomLog(LOG_INFO, TextFormat("%f", dist), 0);
     Vector2 p2 = RotatePoint(tmp, p1, 45);
