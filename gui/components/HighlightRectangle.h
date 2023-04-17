@@ -20,7 +20,7 @@ class HighlightRectangle {
   void render(Color tmp = ColorAlpha(accentColor, 0.4)) {
     if (!isDone) {
       DrawRectangle(895, 535 + 24 * pos, 385, 22, tmp);
-      curTime += 0.016;
+      curTime += (0.016 * animationSpeed);
       if (curTime >= time) {
         isDone = true;
         isAnimating = false;

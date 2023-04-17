@@ -12,6 +12,7 @@ extern Color primaryColor, secondaryColor, accentColor, accentColor2,
     backgroundColor, backgroundColor2, textColor;
 extern int curScreen;
 extern bool colorUpdated;
+extern float animationSpeed;
 }  // namespace Settings
 
 #endif

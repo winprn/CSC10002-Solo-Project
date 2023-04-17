@@ -15,3 +15,4 @@ Color Settings::backgroundColor2 = Color({36, 37, 38, 255});
 Color Settings::textColor = Color({228, 230, 235, 255});
 int Settings::curScreen = 0;
 bool Settings::colorUpdated = false;
+float Settings::animationSpeed = 1;

@@ -27,6 +27,18 @@ void SingleLL::render() {
   DrawRectangleRoundedLines({80, 335, 160, 310}, 0.12, 20, 2,
                             ColorAlpha(textColor, 0.6));
 
+  if (GuiButton({115, 290, 30, 30}, GuiIconText(ICON_ARROW_LEFT_FILL, ""),
+                true)) {
+    if (animationSpeed > 0.5)
+      animationSpeed -= 0.5;
+  }
+  DrawTextEx(font_bold, TextFormat("%.1f", animationSpeed), {150, 295}, 20, 1, textColor);
+  if (GuiButton({180, 290, 30, 30}, GuiIconText(ICON_ARROW_RIGHT_FILL, ""),
+                true)) {
+    if (animationSpeed < 2)
+      animationSpeed += 0.5;
+  }
+
   if (GuiButton({110, 350, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;

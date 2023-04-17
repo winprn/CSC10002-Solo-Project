@@ -61,7 +61,7 @@ class GuiNode {
   void render(bool isHighlight = 0) {
     if (isOutdated) {
       if (newOpacity > 0)
-        curOpacity += 0.03;
+        curOpacity += (0.03 / animationSpeed);
       else
         curOpacity -= 0.03;
 
@@ -73,8 +73,8 @@ class GuiNode {
 
     if (isShifted) {
       double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
-      curPos.x += dx / 30;
-      curPos.y += dy / 30;
+      curPos.x += dx / (30 / animationSpeed);
+      curPos.y += dy / (30 / animationSpeed);
       // arrNext.start = {curPos.x + 60, curPos.y + 25};
 
       if (fabs(dx) <= 0.05 && fabs(dy) <= 0.05) {
@@ -111,7 +111,7 @@ class GuiNode {
                    ColorAlpha(textColor, curOpacity));
       }
       if (isHighlighted)
-        progress += 0.016;
+        progress += (0.016 * animationSpeed);
       // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
       if (progress > highlight) {
         isDone = true;
