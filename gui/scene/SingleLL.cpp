@@ -266,9 +266,7 @@ void SingleLL::render() {
       isNodeNext = false;
     }
   }
-  // CustomLog(LOG_INFO,
-  //           TextFormat("2lai = %d, index = %d", shouldHighlight, isAddToIndex),
-  //           0);
+  
   if (!shouldHighlight && (isAddToIndex || isUpdating)) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
@@ -783,6 +781,7 @@ void SingleLL::render() {
     }
     GuiFileDialog(&fileDialogState);
   }
+  
   if (GetTime() - errStartTime < 2 && errStartTime > 0) {
     DrawTextEx(font_bold, "Please select a node", {50, 250}, 22, 1, textColor);
   }

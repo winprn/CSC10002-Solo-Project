@@ -11,6 +11,7 @@
 using namespace Settings;
 
 class SettingScreen {
+  ColorSelector node{&primaryColor, {897, 307, 100, 100}, "Node Color"};
   ColorSelector bg{&backgroundColor, {478, 167, 100, 100}, "Background Color"};
   ColorSelector text{&textColor, {897, 167, 100, 100}, "Text Color"};
   ColorSelector button{&accentColor, {478, 307, 100, 100}, "Button Color"};
@@ -25,6 +26,7 @@ class SettingScreen {
     }
     bg.render();
     text.render();
+    node.render();
     Color tmp = accentColor;
     button.render();
     if (tmp.r != accentColor.r || tmp.g != accentColor.g ||
@@ -35,15 +37,16 @@ class SettingScreen {
       bg.updateCurrentColor();
       text.updateCurrentColor();
       button.updateCurrentColor();
+      node.updateCurrentColor();
       colorUpdated = false;
     }
 
-    if (GuiButton({701, 309, 180, 40}, GuiIconText(2, "Save config"))) {
+    if (GuiButton({551, 465, 180, 40}, GuiIconText(2, "Save config"))) {
       printColorToFile(backgroundColor);
       printColorToFile(accentColor);
       printColorToFile(textColor);
     }
-    if (GuiButton({701, 367, 180, 40}, GuiIconText(5, "Load config"))) {
+    if (GuiButton({551, 520, 180, 40}, GuiIconText(5, "Load config"))) {
       fileDialogState.windowActive = true;
     }
     if (fileDialogState.windowActive)

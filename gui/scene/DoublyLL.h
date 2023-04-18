@@ -22,12 +22,14 @@ class DoublyLL {
        showSearchButtons = false, showUpdateButtons = false,
        shouldHighlight = true, shouldMoveUp = true, needUpdate = true,
        found = false, isAddToHead = false, isAddToTail = false,
-       isAddToIndex = false, isRemoveHead = false, isRemoveTail = false,
+       isAddToIndex = false, isRemoveHead = false, isRemoveTail = false, isRemoveIndex = false,
        isNodeNext = false, isCodeNext = false;
   bool enableInput[10] = {false}, showInputBox[10] = {false},
-       lineHighlight[10] = {false};
-  int value[10] = {0}, index = -1, randomSize = 0, newVal = -1;
+       lineHighlight[10] = {false}, selected[20] = {false};
+  int value[10] = {0}, index = -1, randomSize = 0, newVal = -1,
+      currentIndex = -1;
   float time = 0;
+  double errStartTime = 0;
   char input[10][10] = {""}, *fileData = nullptr, filePath[512] = {0};
   const char* options = "ADD;DELETE;SEARCH";
   HighlightRectangle rect;
@@ -54,6 +56,8 @@ class DoublyLL {
   void addFromFile();
   void setIsLast();
   void update();
+  void setArrNext(Node* cur);
+  void setArrPrev(Node* cur);
 };
 
 #endif

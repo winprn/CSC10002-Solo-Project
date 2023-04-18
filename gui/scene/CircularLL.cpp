@@ -402,6 +402,7 @@ void CircularLL::render() {
       cur->guiNode.setArrowNext(
           {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
           {head->guiNode.getCurPos().x + 25, head->guiNode.getCurPos().y + 50});
+          cur->guiNode.setIsCycle(true);
     }
     // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
     if ((isSearching || isAddToIndex || isUpdating ||
