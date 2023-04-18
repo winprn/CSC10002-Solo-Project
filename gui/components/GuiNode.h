@@ -18,7 +18,8 @@ class GuiNode {
   bool isLast = false, isOutdated = false, isShifted = false,
        isHighlighted = false, isDone = false, isRemove = false,
        isLengthChanged = false, isHead = false, isSelected = false,
-       shouldRenderArrowNext = false, shouldRenderArrowPrev = false;
+       shouldRenderArrowNext = false, shouldRenderArrowPrev = false,
+       isNewlyAdded = false;
   char text[20] = "";
   Arrow arrNext, arrPrev;
   Color highlightColor = Color({125, 126, 120, 255});
@@ -57,6 +58,8 @@ class GuiNode {
     }
     return false;
   }
+
+  bool getIsNewlyAdded() { return isNewlyAdded; }
 
   void render(bool isHighlight = 0) {
     if (isOutdated) {
@@ -201,6 +204,12 @@ class GuiNode {
   void setText(const char* t) { strcpy(text, t); }
 
   void setIsSelected(bool selected) { isSelected = selected; }
+
+  void setIsNewlyAdded(bool isNewlyAdded) { this->isNewlyAdded = isNewlyAdded; }
+
+  void setIsCycle(bool cycle) {
+    arrNext.setIsCycle(cycle);
+  }
 };
 
 #endif

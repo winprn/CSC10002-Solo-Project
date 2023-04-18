@@ -11,6 +11,7 @@ using namespace Settings;
 class Arrow {
  public:
   Vector2 start, end;
+  bool isCycle = false;
   Arrow() : start{0, 0}, end{0, 0} {}
   Arrow(Vector2 s, Vector2 e) : start{s}, end{e} {}
 
@@ -35,7 +36,7 @@ class Arrow {
 
   void render() {
     // draw a line
-    if (abs(start.x - end.x) < 80)
+    if (!isCycle)
       DrawLineEx(start, end, 2, textColor);
     else {
       DrawLineEx(start, {start.x + 20, start.y}, 2, textColor);
@@ -49,7 +50,7 @@ class Arrow {
     // get the first point of the triangle, which is the end of the line
     Vector2 p1 = end;
     Vector2 tmp = {0, 0};
-    if (abs(start.x - end.x) < 80)
+    if (!isCycle)
       tmp = Vector2MoveTowards(end, start, 10);
     else
       tmp = Vector2MoveTowards(end, {end.x, end.y + 10}, 10);
@@ -67,6 +68,8 @@ class Arrow {
     // draw the triangle
     DrawTriangle(p1, p2, p3, textColor);
   }
+
+  void setIsCycle(bool cycle) { isCycle = cycle; }
 };
 
 #endif
