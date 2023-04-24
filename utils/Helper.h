@@ -92,4 +92,8 @@ void loadConfig(char* filePath) {
   }
 }
 
+float getAngle(Vector2 a, Vector2 b, Vector2 c) {
+  return acos((Vector2DistanceSqr(a, c) + Vector2DistanceSqr(b, c) - Vector2DistanceSqr(a, b)) / (2 * Vector2Distance(a, c) * Vector2Distance(b, c)));
+}
+
 #endif

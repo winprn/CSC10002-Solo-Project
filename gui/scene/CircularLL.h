@@ -3,6 +3,7 @@
 
 #include "../../lib/raylib.h"
 #include "../components/GuiNode.h"
+#include "../components/CircleGuiNode.h"
 #include "../components/HighlightRectangle.h"
 #include <string>
 
@@ -14,6 +15,8 @@ class CircularLL {
   };
 
   Node *head, *tail;
+  const Vector2 center{610, 355};
+  const float radius = 200;
 
  public:
   bool searchDone = true, animDone = true, isAdding = false, isDeleting = false,
@@ -42,6 +45,7 @@ class CircularLL {
 
   int getSize();
   int getHead();
+  Vector2 getNodePos(int pos, int size, int delta = 0);
 
   bool add(int val, int pos, bool hasAnimation = true);
   void reset();

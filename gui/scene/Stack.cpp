@@ -23,154 +23,41 @@ void Stack::render() {
     curScreen = 0;
   }
 
+  DrawLineEx({575, 150}, {575, 680}, 2, WHITE);
+  DrawLineEx({575, 680}, {705, 680}, 2, WHITE);
+  DrawLineEx({705, 680}, {705, 150}, 2, WHITE);
+
   if (GuiButton({100, 415, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;
   }
-  if (GuiButton({100, 475, 100, 40}, "Add")) {
+  if (GuiButton({100, 475, 100, 40}, "Push")) {
     reset();
     showAddButtons = true;
   }
-  if (GuiButton({100, 535, 100, 40}, "Delete")) {
+  if (GuiButton({100, 535, 100, 40}, "Pop")) {
     reset();
-    showDeleteButtons = true;
-  }
-  if (GuiButton({100, 595, 100, 40}, "Search")) {
-    reset();
-    showSearchButtons = true;
-  }
-  if (GuiButton({100, 655, 100, 40}, "Update")) {
-    reset();
-    showUpdateButtons = true;
+    index = 1;
+    isRemoveHead = true;
+    animDone = false;
+    shouldHighlight = false;
+    needUpdate = true;
+    showDeleteButtons = false;
+    memset(lineHighlight, 0, sizeof(lineHighlight));
   }
 
   if (showAddButtons) {
-    if (GuiButton({280, 475, 100, 40}, "Add to head")) {
-      memset(showInputBox, 0, sizeof(showInputBox));
-      memset(lineHighlight, 0, sizeof(lineHighlight));
-      showInputBox[0] = true;
-    }
-    if (showInputBox[0]) {
-      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0],
-                       enableInput[0], ICON_PLUS)) {
-        index = 1;
-        isAddToHead = true;
-        shouldMoveUp = false;
-        add(value[0], 1);
-        showInputBox[0] = false;
-        strcpy(input[0], "");
-      }
-    }
-    if (GuiButton({400, 475, 100, 40}, "Add to tail")) {
-      memset(showInputBox, 0, sizeof(showInputBox));
-      memset(lineHighlight, 0, sizeof(lineHighlight));
-      showInputBox[1] = true;
-    }
-    if (showInputBox[1]) {
-      if (DrawInputBox({400, 535, 60, 30}, "", input[0], value[0],
-                       enableInput[0], ICON_PLUS)) {
-        index = getSize() + 1;
-        isAddToTail = true;
-        isNodeNext = false;
-        animDone = true;
-        shouldMoveUp = false;
-        add(value[0], getSize() + 1, 0);
-        showInputBox[1] = false;
-        strcpy(input[0], "");
-      }
-    }
-    if (GuiButton({520, 475, 100, 40}, "Add to index")) {
-      memset(showInputBox, 0, sizeof(showInputBox));
-      showInputBox[2] = true;
-    }
-    if (showInputBox[2]) {
-      if (DrawInputBox({520, 535, 60, 30}, "", input[0], value[0],
-                       enableInput[0], ICON_PLUS)) {
-        if (currentIndex == -1) {
-          errStartTime = GetTime();
-        } else {
-          index = currentIndex;
-          isAddToIndex = true;
-          shouldHighlight = false;
-          shouldMoveUp = false;
-          needUpdate = true;
-          animDone = false;
-          currentIndex = -1;
-          memset(lineHighlight, 0, sizeof(lineHighlight));
-          memset(selected, 0, sizeof(selected));
-          add(value[0], index, 0);
-          showInputBox[2] = false;
-          strcpy(input[0], "");
-        }
-      }
-    }
-  }
-  if (showDeleteButtons) {
-    if (GuiButton({280, 535, 100, 40}, "Delete head")) {
+    if (DrawInputBox({280, 475, 60, 30}, "", input[0], value[0], enableInput[0],
+                     ICON_PLUS)) {
       index = 1;
-      isRemoveHead = true;
-      animDone = false;
-      shouldHighlight = false;
-      needUpdate = true;
-      memset(lineHighlight, 0, sizeof(lineHighlight));
-    }
-    if (GuiButton({400, 535, 100, 40}, "Delete tail")) {
-      index = getSize();
-      isDeleting = true;
-      shouldHighlight = false;
-      isRemoveTail = true;
+      isAddToHead = true;
+      shouldMoveUp = false;
       needUpdate = true;
       animDone = false;
       memset(lineHighlight, 0, sizeof(lineHighlight));
-    }
-    if (GuiButton({520, 535, 100, 40}, "Delete at index")) {
-      if (currentIndex == -1) {
-        errStartTime = GetTime();
-      } else {
-        index = currentIndex;
-        isRemoveIndex = true;
-        shouldHighlight = false;
-        needUpdate = true;
-        animDone = false;
-        currentIndex = -1;
-        memset(lineHighlight, 0, sizeof(lineHighlight));
-        memset(selected, 0, sizeof(selected));
-        showInputBox[1] = false;
-        strcpy(input[0], "");
-      }
-    }
-  }
-  if (showSearchButtons) {
-    if (DrawInputBox({240, 595, 50, 30}, "", input[0], value[0], enableInput[0],
-                     ICON_LENS)) {
-      index = value[0];
-      isSearching = true;
-      shouldHighlight = false;
-      needUpdate = true;
-      found = false;
-      memset(lineHighlight, 0, sizeof(lineHighlight));
-      search(index);
+      add(value[0], 1);
+      showInputBox[0] = false;
       strcpy(input[0], "");
-    }
-  }
-  if (showUpdateButtons) {
-    if (DrawInputBox({240, 655, 50, 30}, "", input[0], value[0], enableInput[0],
-                     ICON_REPEAT_FILL)) {
-      if (currentIndex == -1) {
-        errStartTime = GetTime();
-      } else {
-        index = currentIndex;
-        newVal = value[0];
-        isUpdating = true;
-        shouldHighlight = false;
-        needUpdate = true;
-        animDone = false;
-        currentIndex = -1;
-        memset(showInputBox, 0, sizeof(showInputBox));
-        memset(selected, 0, sizeof(selected));
-        strcpy(input[0], "");
-        strcpy(input[1], "");
-      }
     }
   }
 
@@ -353,7 +240,8 @@ void Stack::render() {
                     head->guiNode.getCurPos().y + 60},
                    20, 1, textColor);
       if (rect.getPos() > 1) {
-        head->next->guiNode.setIsHead(true);
+        if (head->next)
+          head->next->guiNode.setIsHead(true);
         head->guiNode.setIsHead(false);
       }
       if (rect.getPos() > 2) {
@@ -528,9 +416,9 @@ void Stack::render() {
     if (cur->guiNode.getIsRemove() || (!shouldMoveUp && idx == index) ||
         (!shouldMoveUp &&
          ((cur == tail && isAddToTail) || (cur == head && isAddToHead)))) {
-      cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y + 50});
+      cur->guiNode.setNewPos({(float)400, BASE_Y - 60});
     } else
-      cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y});
+      cur->guiNode.setNewPos({(float)585, (float)630 - 50 * (getSize() - idx)});
   }
   if (isAddToHead || isAddToTail) {
     if (!lineHighlight[0]) {
@@ -794,10 +682,11 @@ bool Stack::add(int val, int pos, bool hasAnimation) {
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  newNode->guiNode = GuiNode({(float)(BASE_X * pos), BASE_Y + 50});
+  newNode->guiNode = GuiNode({(float)500, BASE_Y - 60});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
   newNode->guiNode.setShouldRenderArrowNext(false);
+  newNode->guiNode.setIsStackNode(true);
 
   if (pos == 1) {
     newNode->next = head;
@@ -840,8 +729,10 @@ bool Stack::add(int val, int pos, bool hasAnimation) {
 
 void Stack::getRandom() {
   randomSize = max(1, rand() % 11);
+  int n = randomSize;
   while (randomSize--) {
-    add(rand() % 100, getSize() + 1, false);
+    add(10 + rand() % 90, getSize() + 1, false);
+    tail->guiNode.setCurPos({(float)585, (float)630 - 50 * (randomSize)});
   }
 }
 
@@ -850,7 +741,7 @@ void Stack::remove(int id) {
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
       CustomLog(LOG_DEBUG, "founded", 0);
-      cur->guiNode.setNewPos({(float)(BASE_X * idx), BASE_Y + 50});
+      cur->guiNode.setNewPos({(float)700, BASE_Y - 60});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
     }
@@ -880,6 +771,7 @@ void Stack::removeFromLL() {
     if (found == head) {
       head = head->next;
       isRemoveHead = false;
+      CustomLog(LOG_DEBUG, TextFormat("head = %d", head), 0);
     } else {
       Node* prev = head;
       while (prev->next != found) {

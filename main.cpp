@@ -9,11 +9,60 @@
 #include "gui/scene/Stack.h"
 #include "lib/raygui.h"
 #include "lib/raylib.h"
+#include "lib/rlgl.h"
 #include "utils/Log.h"
 #include "utils/Settings.h"
 #include <bits/stdc++.h>
 
+#define sqr(x) (x) * (x)
+
 using namespace std;
+
+void drawCircleSectorLines(Vector2 center, float radius, float startAngle,
+                           float endAngle, int segments, Color color) {
+  if (radius <= 0.0f)
+    radius = 0.1f;  // Avoid div by zero issue
+
+  // Function expects (endAngle > startAngle)
+  if (endAngle < startAngle) {
+    // Swap values
+    float tmp = startAngle;
+    startAngle = endAngle;
+    endAngle = tmp;
+  }
+
+  int minSegments = (int)ceilf((endAngle - startAngle) / 90);
+
+  if (segments < minSegments) {
+    // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
+    float th = acosf(2 * powf(1 - 0.5f / radius, 2) - 1);
+    segments = (int)((endAngle - startAngle) * ceilf(2 * PI / th) / 360);
+
+    if (segments <= 0)
+      segments = minSegments;
+  }
+
+  float stepLength = (endAngle - startAngle) / (float)segments;
+  float angle = startAngle;
+  bool showCapLines = false;
+  Rectangle texShapesRec = {0.0f, 0.0f, 1.0f, 1.0f};
+  Texture2D texShapes = {1, 1, 1, 1, 7};
+
+  rlBegin(RL_LINES);
+
+  for (int i = 0; i < segments; i++) {
+    rlColor4ub(color.r, color.g, color.b, color.a);
+
+    rlVertex2f(center.x + sinf(DEG2RAD * angle) * radius,
+               center.y + cosf(DEG2RAD * angle) * radius);
+    rlVertex2f(center.x + sinf(DEG2RAD * (angle + stepLength)) * radius,
+               center.y + cosf(DEG2RAD * (angle + stepLength)) * radius);
+
+    angle += stepLength;
+  }
+  
+  rlEnd();
+}
 
 void drawMenu() {
   DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",

@@ -18,40 +18,57 @@ void CircularLL::render() {
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  DrawTextEx(font_bold, "Circular Linked List", {501, 31}, 40, 1, WHITE);
+  DrawTextEx(font_bold, "Singly Linked List", {501, 31}, 40, 1, WHITE);
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }
 
-  if (GuiButton({100, 415, 100, 40}, "Create")) {
+  DrawRectangleRounded({80, 335, 160, 310}, 0.12, 20, backgroundColor2);
+  DrawRectangleRoundedLines({80, 335, 160, 310}, 0.12, 20, 2,
+                            ColorAlpha(textColor, 0.6));
+
+  if (GuiButton({115, 290, 30, 30}, GuiIconText(ICON_ARROW_LEFT_FILL, ""),
+                true)) {
+    if (animationSpeed > 0.5)
+      animationSpeed -= 0.5;
+  }
+  DrawTextEx(font_bold, TextFormat("%.1f", animationSpeed), {150, 295}, 20, 1,
+             textColor);
+  if (GuiButton({180, 290, 30, 30}, GuiIconText(ICON_ARROW_RIGHT_FILL, ""),
+                true)) {
+    if (animationSpeed < 2)
+      animationSpeed += 0.5;
+  }
+
+  if (GuiButton({110, 350, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;
   }
-  if (GuiButton({100, 475, 100, 40}, "Add")) {
+  if (GuiButton({110, 410, 100, 40}, "Add")) {
     reset();
     showAddButtons = true;
   }
-  if (GuiButton({100, 535, 100, 40}, "Delete")) {
+  if (GuiButton({110, 470, 100, 40}, "Delete")) {
     reset();
     showDeleteButtons = true;
   }
-  if (GuiButton({100, 595, 100, 40}, "Search")) {
+  if (GuiButton({110, 530, 100, 40}, "Search")) {
     reset();
     showSearchButtons = true;
   }
-  if (GuiButton({100, 655, 100, 40}, "Update")) {
+  if (GuiButton({110, 590, 100, 40}, "Update")) {
     reset();
     showUpdateButtons = true;
   }
 
   if (showAddButtons) {
-    if (GuiButton({280, 475, 100, 40}, "Add to head")) {
+    if (GuiButton({280, 410, 100, 40}, "Add to head")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[0] = true;
     }
     if (showInputBox[0]) {
-      if (DrawInputBox({280, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({280, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         index = 1;
         isAddToHead = true;
@@ -61,13 +78,13 @@ void CircularLL::render() {
         strcpy(input[0], "");
       }
     }
-    if (GuiButton({400, 475, 100, 40}, "Add to tail")) {
+    if (GuiButton({400, 410, 100, 40}, "Add to tail")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       memset(lineHighlight, 0, sizeof(lineHighlight));
       showInputBox[1] = true;
     }
     if (showInputBox[1]) {
-      if (DrawInputBox({400, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({400, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         index = getSize() + 1;
         isAddToTail = true;
@@ -79,12 +96,12 @@ void CircularLL::render() {
         strcpy(input[0], "");
       }
     }
-    if (GuiButton({520, 475, 100, 40}, "Add to index")) {
+    if (GuiButton({520, 410, 100, 40}, "Add to index")) {
       memset(showInputBox, 0, sizeof(showInputBox));
       showInputBox[2] = true;
     }
     if (showInputBox[2]) {
-      if (DrawInputBox({520, 535, 60, 30}, "", input[0], value[0],
+      if (DrawInputBox({520, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
         if (currentIndex == -1) {
           errStartTime = GetTime();
@@ -106,7 +123,7 @@ void CircularLL::render() {
     }
   }
   if (showDeleteButtons) {
-    if (GuiButton({280, 535, 100, 40}, "Delete head")) {
+    if (GuiButton({280, 470, 100, 40}, "Delete head")) {
       index = 1;
       isRemoveHead = true;
       animDone = false;
@@ -114,7 +131,7 @@ void CircularLL::render() {
       needUpdate = true;
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
-    if (GuiButton({400, 535, 100, 40}, "Delete tail")) {
+    if (GuiButton({400, 470, 100, 40}, "Delete tail")) {
       index = getSize();
       isDeleting = true;
       shouldHighlight = false;
@@ -123,7 +140,7 @@ void CircularLL::render() {
       animDone = false;
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
-    if (GuiButton({520, 535, 100, 40}, "Delete at index")) {
+    if (GuiButton({520, 470, 100, 40}, "Delete at index")) {
       if (currentIndex == -1) {
         errStartTime = GetTime();
       } else {
@@ -141,7 +158,7 @@ void CircularLL::render() {
     }
   }
   if (showSearchButtons) {
-    if (DrawInputBox({240, 595, 50, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({250, 530, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_LENS)) {
       index = value[0];
       isSearching = true;
@@ -154,7 +171,7 @@ void CircularLL::render() {
     }
   }
   if (showUpdateButtons) {
-    if (DrawInputBox({240, 655, 50, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({250, 590, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_REPEAT_FILL)) {
       if (currentIndex == -1) {
         errStartTime = GetTime();
@@ -168,6 +185,7 @@ void CircularLL::render() {
         currentIndex = -1;
         memset(showInputBox, 0, sizeof(showInputBox));
         memset(selected, 0, sizeof(selected));
+        memset(lineHighlight, 0, sizeof(lineHighlight));
         strcpy(input[0], "");
         strcpy(input[1], "");
       }
@@ -249,9 +267,7 @@ void CircularLL::render() {
       isNodeNext = false;
     }
   }
-  // CustomLog(LOG_INFO,
-  //           TextFormat("2lai = %d, index = %d", shouldHighlight, isAddToIndex),
-  //           0);
+
   if (!shouldHighlight && (isAddToIndex || isUpdating)) {
     if (!lineHighlight[0]) {
       if (needUpdate) {
@@ -357,6 +373,7 @@ void CircularLL::render() {
         head->guiNode.setIsHead(false);
       }
       if (rect.getPos() > 2) {
+        isRemoveHead = false;
         remove(index);
         index = -1;
       }
@@ -401,8 +418,8 @@ void CircularLL::render() {
     if (cur == tail) {
       cur->guiNode.setArrowNext(
           {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
-          {head->guiNode.getCurPos().x + 25, head->guiNode.getCurPos().y + 50});
-          cur->guiNode.setIsCycle(true);
+          {head->guiNode.getCurPos().x + 30, head->guiNode.getCurPos().y + 50});
+      cur->guiNode.setIsCycle(true);
     }
     // CustomLog(LOG_DEBUG, TextFormat("%.2f", cur->guiNode.getProgress()), 0);
     if ((isSearching || isAddToIndex || isUpdating ||
@@ -724,6 +741,7 @@ void CircularLL::render() {
         for (; tmp && idx != index; tmp = tmp->next, idx++)
           ;
         tmp->guiNode.setVal(newVal);
+        tmp->val = newVal;
         isUpdating = false;
       }
     }
@@ -731,16 +749,18 @@ void CircularLL::render() {
 
   if (animDone) {
     for (Node* cur = head; cur != nullptr; cur = cur->next) {
-      if (cur->next == tail && isAddToTail) {
-      } else if (!isAddToIndex) {
-        if (isRemoveTail && cur->next == tail) {
-          DrawText("cur", cur->guiNode.getCurPos().x + 10,
-                   cur->guiNode.getCurPos().y + 60, 20, textColor);
-        } else {
-          cur->guiNode.setIsLast(false);
-          cur->guiNode.setShouldRenderArrowNext(true);
+      if (cur->next) {
+        if (cur->next == tail && isAddToTail) {
+        } else if (!isAddToIndex) {
+          if (isRemoveTail && cur->next == tail) {
+            DrawText("cur", cur->guiNode.getCurPos().x + 10,
+                     cur->guiNode.getCurPos().y + 60, 20, textColor);
+          } else {
+            cur->guiNode.setIsLast(false);
+          }
         }
       }
+      cur->guiNode.setShouldRenderArrowNext(true);
       if (cur->guiNode.getIsDone())
         cur->guiNode.setHighLightColor();
       cur->guiNode.setIsDone(false);
@@ -749,10 +769,10 @@ void CircularLL::render() {
       index = -1;
   }
   if (showCreateButtons) {
-    if (GuiButton({280, 415, 100, 40}, "Random")) {
+    if (GuiButton({280, 350, 100, 40}, "Random")) {
       createRandomList();
     }
-    if (GuiButton({400, 415, 100, 40}, "From file")) {
+    if (GuiButton({400, 350, 100, 40}, "From file")) {
       fileDialogState.windowActive = true;
     }
     if (fileDialogState.windowActive)
@@ -768,6 +788,7 @@ void CircularLL::render() {
     }
     GuiFileDialog(&fileDialogState);
   }
+
   if (GetTime() - errStartTime < 2 && errStartTime > 0) {
     DrawTextEx(font_bold, "Please select a node", {50, 250}, 22, 1, textColor);
   }
@@ -949,6 +970,7 @@ void CircularLL::setIsLast() {
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     if (cur->next) {
       cur->guiNode.setIsLast(false);
+      cur->guiNode.setShouldRenderArrowNext(true);
     }
   }
 }
