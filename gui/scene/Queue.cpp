@@ -1,4 +1,3 @@
-#include "Stack.h"
 #include "../../lib/gui_file_dialog.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
@@ -6,6 +5,7 @@
 #include "../../utils/Settings.h"
 #include "../components/GuiNode.h"
 #include "../components/InputBox.h"
+#include "Queue.h"
 
 #include <chrono>
 #include <string>
@@ -13,19 +13,18 @@
 using namespace std;
 using namespace Settings;
 
-void Stack::render() {
+void Queue::render() {
   ClearBackground(backgroundColor);
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  DrawTextEx(font_bold, "Stack", {595, 30}, 40, 1, textColor);
+  DrawTextEx(font_bold, "Queue", {595, 30}, 40, 1, textColor);
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }
 
-  DrawLineEx({575, 200}, {575, 580}, 2, textColor);
-  DrawLineEx({575, 580}, {705, 580}, 2, textColor);
-  DrawLineEx({705, 580}, {705, 200}, 2, textColor);
+  DrawLineEx({290, 200}, {990, 200}, 2, textColor);
+  DrawLineEx({290, 330}, {990, 330}, 2, textColor);
 
   if (GuiButton({100, 415, 100, 40}, "Create")) {
     reset();
@@ -50,16 +49,16 @@ void Stack::render() {
     if (DrawInputBox({280, 475, 60, 30}, "", input[0], value[0], enableInput[0],
                      ICON_PLUS)) {
       if (getSize() < 7) {
-        index = 1;
-        isAddToHead = true;
+        index = getSize() + 1;
+        isAddToTail = true;
         shouldMoveUp = false;
         needUpdate = true;
         animDone = false;
         memset(lineHighlight, 0, sizeof(lineHighlight));
-        add(value[0], 1);
+        add(value[0], index);
       } else {
         errStartTime = GetTime();
-        strcpy(errMessage, "Stack is full");
+        strcpy(errMessage, "Queue is full");
       }
       showInputBox[0] = false;
       strcpy(input[0], "");
@@ -421,9 +420,9 @@ void Stack::render() {
     if (cur->guiNode.getIsRemove() || (!shouldMoveUp && idx == index) ||
         (!shouldMoveUp &&
          ((cur == tail && isAddToTail) || (cur == head && isAddToHead)))) {
-      cur->guiNode.setNewPos({(float)400, BASE_Y - 60});
+      cur->guiNode.setNewPos({(float)250, 210});
     } else
-      cur->guiNode.setNewPos({(float)585, (float)530 - 50 * (getSize() - idx)});
+      cur->guiNode.setNewPos({(float)850 - 50 * idx, 210});
   }
   if (isAddToHead || isAddToTail) {
     if (!lineHighlight[0]) {
@@ -662,7 +661,7 @@ void Stack::render() {
   }
 }
 
-int Stack::getSize() {
+int Queue::getSize() {
   int sz = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     sz++;
@@ -670,13 +669,13 @@ int Stack::getSize() {
   return sz;
 }
 
-int Stack::getHead() {
+int Queue::getHead() {
   if (head == nullptr)
     return 123;
   return head->val;
 }
 
-bool Stack::add(int val, int pos, bool hasAnimation) {
+bool Queue::add(int val, int pos, bool hasAnimation) {
   if (getSize() >= 8)
     return false;
   // if (pos)
@@ -687,11 +686,11 @@ bool Stack::add(int val, int pos, bool hasAnimation) {
   Node* newNode = new Node;
   newNode->val = val;
   newNode->next = nullptr;
-  newNode->guiNode = GuiNode({(float)400, BASE_Y - 60});
+  newNode->guiNode = GuiNode({(float)250, 210});
   newNode->guiNode.setVal(val);
   newNode->guiNode.setNewOpacity(1);
   newNode->guiNode.setShouldRenderArrowNext(false);
-  newNode->guiNode.setIsStackNode(true);
+  newNode->guiNode.setIsQueueNode(true);
 
   if (pos == 1) {
     newNode->next = head;
@@ -732,28 +731,28 @@ bool Stack::add(int val, int pos, bool hasAnimation) {
   return true;
 }
 
-void Stack::getRandom() {
+void Queue::getRandom() {
   randomSize = max(1, rand() % 8);
   int n = randomSize;
   while (randomSize--) {
     add(10 + rand() % 90, getSize() + 1, false);
-    tail->guiNode.setCurPos({(float)585, (float)530 - 50 * (randomSize)});
+    tail->guiNode.setCurPos({(float)850 - 50 * (n - randomSize), 210});
   }
 }
 
-void Stack::remove(int id) {
+void Queue::remove(int id) {
   int idx = 1;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
     if (idx == id) {
       CustomLog(LOG_DEBUG, "founded", 0);
-      cur->guiNode.setNewPos({(float)700, BASE_Y - 60});
+      cur->guiNode.setNewPos({(float)1000, 210});
       cur->guiNode.setNewOpacity(0);
       cur->guiNode.setIsRemove(true);
     }
   }
 }
 
-void Stack::removeAll() {
+void Queue::removeAll() {
   while (head != nullptr) {
     Node* tmp = head;
     head = head->next;
@@ -761,7 +760,7 @@ void Stack::removeAll() {
   }
 }
 
-void Stack::removeFromLL() {
+void Queue::removeFromLL() {
   Node* found = nullptr;
   int idx = 0;
   for (Node* cur = head; cur != nullptr; cur = cur->next, idx++) {
@@ -797,14 +796,14 @@ void Stack::removeFromLL() {
   }
 }
 
-void Stack::animate() {
+void Queue::animate() {
   if (head == nullptr)
     return;
   head->guiNode.setNewHighlight(1);
   animDone = false;
 }
 
-void Stack::search(int val) {
+void Queue::search(int val) {
   CustomLog(LOG_DEBUG, "inside search", 0);
   if (head == nullptr)
     return;
@@ -812,7 +811,7 @@ void Stack::search(int val) {
   animDone = false;
 }
 
-void Stack::reset() {
+void Queue::reset() {
   showCreateButtons = false;
   showAddButtons = false;
   showDeleteButtons = false;
@@ -821,13 +820,13 @@ void Stack::reset() {
   memset(showInputBox, 0, sizeof(showInputBox));
 }
 
-void Stack::createRandomList() {
+void Queue::createRandomList() {
   removeAll();
   getRandom();
   setIsLast();
 }
 
-void Stack::addFromFile() {
+void Queue::addFromFile() {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");
@@ -840,11 +839,11 @@ void Stack::addFromFile() {
   }
   for (int i = 0; i < n; i++) {
     add(arr[i], getSize() + 1, false);
-    tail->guiNode.setCurPos({(float)585, (float)530 - 50 * (n - (i + 1))});
+    tail->guiNode.setCurPos({(float)850 - 50 * i, 210});
   }
 }
 
-void Stack::setIsLast() {
+void Queue::setIsLast() {
   for (Node* cur = head; cur != nullptr; cur = cur->next) {
     if (cur->next) {
       cur->guiNode.setIsLast(false);
@@ -852,7 +851,7 @@ void Stack::setIsLast() {
   }
 }
 
-void Stack::update() {
+void Queue::update() {
   isUpdating = true;
   animate();
 }

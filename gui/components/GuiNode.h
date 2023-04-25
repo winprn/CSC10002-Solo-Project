@@ -20,7 +20,7 @@ class GuiNode {
        isHighlighted = false, isDone = false, isRemove = false,
        isLengthChanged = false, isHead = false, isSelected = false,
        shouldRenderArrowNext = false, shouldRenderArrowPrev = false,
-       isDoublyNode = false, isStackNode = false;
+       isDoublyNode = false, isStackNode = false, isQueueNode = false;
   char text[20] = "";
   Arrow arrNext, arrPrev;
   Color highlightColor = Color({125, 126, 120, 255});
@@ -60,6 +60,18 @@ class GuiNode {
   }
 
   void render(bool isHighlight = 0) {
+    if (isOutdated && !isStackNode) {
+      if (newOpacity > 0)
+        curOpacity += (0.03 / animationSpeed);
+      else
+        curOpacity -= 0.03;
+
+      if (fabs(curOpacity - newOpacity) <= 0.1) {
+        curOpacity = newOpacity;
+        isOutdated = false;
+      }
+    }
+
     if (isShifted) {
       double dx = newPos.x - curPos.x, dy = newPos.y - curPos.y;
       if (isStackNode) {
@@ -113,30 +125,50 @@ class GuiNode {
     if (isStackNode) {
       rect.width = 110;
       rect.height = 40;
+    } else if (isQueueNode) {
+      rect.width = 40;
+      rect.height = 110;
     } else {
       rect.width = 70;
       rect.height = 50;
     }
-    if (isHead && !isStackNode) {
+    if (isHead && !isStackNode && !isQueueNode) {
       DrawTextEx(font_regular, "Head", {curPos.x + 10, curPos.y - 26}, 24, 1,
                  ColorAlpha(textColor, curOpacity));
     }
-    if (isLast && !isStackNode) {
+    if (isLast && !isStackNode && !isQueueNode) {
       DrawTextEx(font_regular, "Tail",
                  {curPos.x + 10, curPos.y - 26 + 76 * isHead}, 24, 1,
                  ColorAlpha(textColor, curOpacity));
     }
-    if (strlen(text) > 0 && !isStackNode) {
+    if (strlen(text) > 0 && !isStackNode && !isQueueNode) {
       DrawTextEx(font_regular, text, {curPos.x + 10, curPos.y + 50}, 24, 1,
                  ColorAlpha(textColor, curOpacity));
     }
 
+    Vector2 textPos = MeasureTextEx(font_bold, TextFormat("%d", val), 22, 1);
     if (isStackNode) {
       DrawRectangleRoundedLines(rect, 0.12, 20, 2,
                                 Fade(primaryColor, curOpacity));
       DrawTextEx(font_bold, TextFormat("%d", val),
-                 {curPos.x + 45, curPos.y + 8}, 22, 1,
-                 Fade(textColor, curOpacity));
+                 {rect.x + (rect.width - textPos.x) / 2,
+                  rect.y + (rect.height - textPos.y) / 2},
+                 22, 1, Fade(textColor, curOpacity));
+      if (isHighlighted)
+        progress += (0.016 * animationSpeed);
+      // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
+      if (progress > highlight) {
+        isDone = true;
+        isHighlighted = false;
+        progress = 0;
+      }
+    } else if (isQueueNode) {
+      DrawRectangleRoundedLines(rect, 0.12, 20, 2,
+                                Fade(primaryColor, curOpacity));
+      DrawTextEx(font_bold, TextFormat("%d", val),
+                 {curPos.x + (rect.width - textPos.x) / 2,
+                  curPos.y + (rect.height - textPos.y) / 2},
+                 22, 1, Fade(textColor, curOpacity));
       if (isHighlighted)
         progress += (0.016 * animationSpeed);
       // CustomLog(LOG_DEBUG, TextFormat("%f", progress), 0);
@@ -215,7 +247,7 @@ class GuiNode {
       }
     }
 
-    if (!isStackNode) {
+    if (!isStackNode && !isQueueNode) {
       if (shouldRenderArrowNext && !isRemove) {
         if (arrNext.end.x != 0)
           arrNext.render();
@@ -298,6 +330,8 @@ class GuiNode {
   void setIsDoublyNode(bool isDoubly) { isDoublyNode = isDoubly; }
 
   void setIsStackNode(bool isStack) { isStackNode = isStack; }
+
+  void setIsQueueNode(bool isQueue) { isQueueNode = isQueue; }
 };
 
 #endif

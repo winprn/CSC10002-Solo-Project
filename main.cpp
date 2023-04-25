@@ -4,6 +4,7 @@
 #include "gui/components/MenuItem.h"
 #include "gui/scene/CircularLL.h"
 #include "gui/scene/DoublyLL.h"
+#include "gui/scene/Queue.h"
 #include "gui/scene/SettingScreen.h"
 #include "gui/scene/SingleLL.h"
 #include "gui/scene/Stack.h"
@@ -17,52 +18,6 @@
 #define sqr(x) (x) * (x)
 
 using namespace std;
-
-void drawCircleSectorLines(Vector2 center, float radius, float startAngle,
-                           float endAngle, int segments, Color color) {
-  if (radius <= 0.0f)
-    radius = 0.1f;  // Avoid div by zero issue
-
-  // Function expects (endAngle > startAngle)
-  if (endAngle < startAngle) {
-    // Swap values
-    float tmp = startAngle;
-    startAngle = endAngle;
-    endAngle = tmp;
-  }
-
-  int minSegments = (int)ceilf((endAngle - startAngle) / 90);
-
-  if (segments < minSegments) {
-    // Calculate the maximum angle between segments based on the error rate (usually 0.5f)
-    float th = acosf(2 * powf(1 - 0.5f / radius, 2) - 1);
-    segments = (int)((endAngle - startAngle) * ceilf(2 * PI / th) / 360);
-
-    if (segments <= 0)
-      segments = minSegments;
-  }
-
-  float stepLength = (endAngle - startAngle) / (float)segments;
-  float angle = startAngle;
-  bool showCapLines = false;
-  Rectangle texShapesRec = {0.0f, 0.0f, 1.0f, 1.0f};
-  Texture2D texShapes = {1, 1, 1, 1, 7};
-
-  rlBegin(RL_LINES);
-
-  for (int i = 0; i < segments; i++) {
-    rlColor4ub(color.r, color.g, color.b, color.a);
-
-    rlVertex2f(center.x + sinf(DEG2RAD * angle) * radius,
-               center.y + cosf(DEG2RAD * angle) * radius);
-    rlVertex2f(center.x + sinf(DEG2RAD * (angle + stepLength)) * radius,
-               center.y + cosf(DEG2RAD * (angle + stepLength)) * radius);
-
-    angle += stepLength;
-  }
-  
-  rlEnd();
-}
 
 void drawMenu() {
   DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",
@@ -78,6 +33,8 @@ void drawMenu() {
       {895, 191, 330, 200}, "Circular Linked List", "images/cll_menu.png"};
   MenuItem stack =
       MenuItem{{55, 440, 330, 200}, "Stack", "images/stack_menu.png"};
+  MenuItem queue =
+      MenuItem{{475, 440, 330, 200}, "Queue", "images/stack_menu.png"};
   if (sll.render())
     curScreen = 1;
   if (dll.render())
@@ -86,11 +43,13 @@ void drawMenu() {
     curScreen = 3;
   if (stack.render())
     curScreen = 4;
+  if (queue.render())
+    curScreen = 5;
 }
 
 void drawSettingButton() {
   if (GuiButton({1173, 30, 50, 50}, GuiIconText(140, ""), true)) {
-    curScreen = 5;
+    curScreen = 7;
   }
 }
 
@@ -102,9 +61,10 @@ int main() {
   DoublyLL dll;
   CircularLL cll;
   Stack st;
+  Queue qu;
   SettingScreen setting;
   ll.createRandomList(), dll.createRandomList(), cll.createRandomList(),
-      st.createRandomList();
+      st.createRandomList(), qu.createRandomList();
   GuiLoadStyle("gui/styles.rgs");
   GuiLoadIcons("gui/iconset.rgi", NULL);
   GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
@@ -139,6 +99,9 @@ int main() {
         st.render();
         break;
       case 5:
+        qu.render();
+        break;
+      case 7:
         setting.render();
         break;
     }

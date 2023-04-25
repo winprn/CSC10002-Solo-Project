@@ -1,12 +1,12 @@
-#ifndef STACK_H
-#define STACK_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
 #include "../../lib/raylib.h"
 #include "../components/GuiNode.h"
 #include "../components/HighlightRectangle.h"
 #include <string>
 
-class Stack {
+class Queue {
   struct Node {
     int val;
     Node* next = nullptr;
@@ -30,13 +30,14 @@ class Stack {
       currentIndex = -1;
   float time = 0;
   double errStartTime = 0;
-  char input[10][10] = {""}, *fileData = nullptr, filePath[512] = {0}, *errMessage = new char[100];
+  char input[10][10] = {""}, *fileData = nullptr, filePath[512] = {0},
+       *errMessage = new char[100];
   const char* options = "ADD;DELETE;SEARCH";
   HighlightRectangle rect;
 
   int active = 0;
-  Stack() : head(nullptr), tail(nullptr) {}
-  ~Stack() {
+  Queue() : head(nullptr), tail(nullptr) {}
+  ~Queue() {
     // delete active;
   }
 
