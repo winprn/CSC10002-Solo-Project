@@ -8,6 +8,7 @@
 #include "gui/scene/SettingScreen.h"
 #include "gui/scene/SingleLL.h"
 #include "gui/scene/Stack.h"
+#include "gui/scene/StaticArray.h"
 #include "lib/raygui.h"
 #include "lib/raylib.h"
 #include "lib/rlgl.h"
@@ -34,7 +35,9 @@ void drawMenu() {
   MenuItem stack =
       MenuItem{{55, 440, 330, 200}, "Stack", "images/stack_menu.png"};
   MenuItem queue =
-      MenuItem{{475, 440, 330, 200}, "Queue", "images/stack_menu.png"};
+      MenuItem{{475, 440, 330, 200}, "Queue", "images/queue_menu.png"};
+  MenuItem sa =
+      MenuItem{{895, 440, 330, 200}, "Static Array", "images/queue_menu.png"};
   if (sll.render())
     curScreen = 1;
   if (dll.render())
@@ -45,6 +48,8 @@ void drawMenu() {
     curScreen = 4;
   if (queue.render())
     curScreen = 5;
+  if (sa.render())
+    curScreen = 6;
 }
 
 void drawSettingButton() {
@@ -63,6 +68,7 @@ int main() {
   Stack st;
   Queue qu;
   SettingScreen setting;
+  StaticArray sa;
   ll.createRandomList(), dll.createRandomList(), cll.createRandomList(),
       st.createRandomList(), qu.createRandomList();
   GuiLoadStyle("gui/styles.rgs");
@@ -100,6 +106,9 @@ int main() {
         break;
       case 5:
         qu.render();
+        break;
+      case 6:
+        sa.render();
         break;
       case 7:
         setting.render();

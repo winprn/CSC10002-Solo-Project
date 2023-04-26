@@ -8,7 +8,7 @@ bool MenuItem::render() {
   // read image from file and draw it
   DrawRectangleRoundedLines(
       {rect.x - 1, rect.y - 1, rect.width + 2, rect.height + 2}, 0.05, 20, 2,
-      textColor);
+      ColorAlpha(textColor, 0.6));
   DrawRectangleRounded(rect, 0.05, 20, backgroundColor);
   DrawTexture(texture, rect.x, rect.y, WHITE);
 
