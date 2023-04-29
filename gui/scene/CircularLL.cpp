@@ -18,7 +18,7 @@ void CircularLL::render() {
   int idx = 0;
   // CustomLog(LOG_INFO, "here", 0);
   removeFromLL();
-  DrawTextEx(font_bold, "Singly Linked List", {501, 31}, 40, 1, WHITE);
+  DrawTextEx(font_bold, "Circular Linked List", {501, 31}, 40, 1, WHITE);
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }

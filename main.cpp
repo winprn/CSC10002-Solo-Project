@@ -4,6 +4,7 @@
 #include "gui/components/MenuItem.h"
 #include "gui/scene/CircularLL.h"
 #include "gui/scene/DoublyLL.h"
+#include "gui/scene/DynamicArray.h"
 #include "gui/scene/Queue.h"
 #include "gui/scene/SettingScreen.h"
 #include "gui/scene/SingleLL.h"
@@ -25,31 +26,38 @@ void drawMenu() {
              {266, 32}, 48, 1, Color({233, 236, 239, 255}));
   DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06",
              {424, 98}, 24, 1, Color({233, 236, 239, 255}));
+  Image logo = LoadImage("images/logo.png");
+  Texture logoTexture = LoadTextureFromImage(logo);
+  DrawTexture(logoTexture, 10, 25, WHITE);
 
   MenuItem sll = MenuItem{
-      {55, 191, 330, 200}, "Singly Linked List", "images/sll_menu.png"};
+      {27, 190, 260, 155}, "Singly Linked List", "images/sll_menu.png"};
   MenuItem dll = MenuItem{
-      {475, 191, 330, 200}, "Doubly Linked List", "images/dll_menu.png"};
+      {350, 190, 260, 155}, "Doubly Linked List", "images/dll_menu.png"};
   MenuItem cll = MenuItem{
-      {895, 191, 330, 200}, "Circular Linked List", "images/cll_menu.png"};
+      {673, 190, 260, 155}, "Circular Linked List", "images/cll_menu.png"};
   MenuItem stack =
-      MenuItem{{55, 440, 330, 200}, "Stack", "images/stack_menu.png"};
+      MenuItem{{996, 190, 260, 155}, "Stack", "images/stack_menu.png"};
   MenuItem queue =
-      MenuItem{{475, 440, 330, 200}, "Queue", "images/queue_menu.png"};
+      MenuItem{{178, 425, 260, 155}, "Queue", "images/queue_menu.png"};
   MenuItem sa =
-      MenuItem{{895, 440, 330, 200}, "Static Array", "images/queue_menu.png"};
+      MenuItem{{510, 425, 260, 155}, "Static Array", "images/sa_menu.png"};
+  MenuItem da =
+      MenuItem{{845, 425, 260, 155}, "Dynamic Array", "images/sa_menu.png"};
   if (sll.render())
-    curScreen = 1;
+    setCurScreen(SLL_SCREEN);
   if (dll.render())
-    curScreen = 2;
+    setCurScreen(DLL_SCREEN);
   if (cll.render())
-    curScreen = 3;
+    setCurScreen(CLL_SCREEN);
   if (stack.render())
-    curScreen = 4;
+    setCurScreen(ST_SCREEN);
   if (queue.render())
-    curScreen = 5;
+    setCurScreen(QU_SCREEN);
   if (sa.render())
-    curScreen = 6;
+    setCurScreen(SA_SCREEN);
+  if (da.render())
+    setCurScreen(DA_SCREEN);
 }
 
 void drawSettingButton() {
@@ -69,6 +77,7 @@ int main() {
   Queue qu;
   SettingScreen setting;
   StaticArray sa;
+  DynamicArray da;
   ll.createRandomList(), dll.createRandomList(), cll.createRandomList(),
       st.createRandomList(), qu.createRandomList();
   GuiLoadStyle("gui/styles.rgs");
@@ -88,29 +97,32 @@ int main() {
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(accentColor2));
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(accentColor2));
     switch (curScreen) {
-      case 0:
+      case HOME_SCREEN:
         drawMenu();
         drawSettingButton();
         break;
-      case 1:
+      case SLL_SCREEN:
         ll.render();
         break;
-      case 2:
+      case DLL_SCREEN:
         dll.render();
         break;
-      case 3:
+      case CLL_SCREEN:
         cll.render();
         break;
-      case 4:
+      case ST_SCREEN:
         st.render();
         break;
-      case 5:
+      case QU_SCREEN:
         qu.render();
         break;
-      case 6:
+      case SA_SCREEN:
         sa.render();
         break;
-      case 7:
+      case DA_SCREEN:
+        da.render();
+        break;
+      case SETTING_SCREEN:
         setting.render();
         break;
     }

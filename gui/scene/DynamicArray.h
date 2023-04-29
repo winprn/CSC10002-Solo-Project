@@ -1,38 +1,30 @@
-#ifndef STATIC_ARRAY_H
-#define STATIC_ARRAY_H
+#ifndef DYNAMIC_ARRAY_H
+#define DYNAMIC_ARRAY_H
 
 #include "../../DS/Vector.h"
 #include "../components/ArrayGuiNode.h"
+#include "../components/InputBox.h"
+#include <vector>
 
 using namespace std;
 
-class StaticArray {
+class DynamicArray {
   const int maxSize = 25;
   bool showCreateButtons = false, showAddButtons = false,
        showDeleteButtons = false, showSearchButtons = false,
-       showUpdateButtons = false, isAddToIndex = false, isPushBack = false,
-       isDeleteIndex = false, isPopBack = false, isSearching = false,
-       found = false;
+       showUpdateButtons = false, showAllocateButtons = false,
+       isAddToIndex = false, isPushBack = false, isDeleteIndex = false,
+       isPopBack = false, isSearching = false, found = false, extend = false;
   int n, val, pos, currentIndex = -1, step = 0, prv = -1;
   float notiTime = 0, startTime = 0;
   bool selected[30] = {false}, showInputBox[10] = {false},
        enableInput[10] = {false};
   int value[10] = {0};
-  char *notiMessage = new char[50], input[10][10], filePath[512] = "";
+  char *notiMessage = new char[50], input[10][10] = {""}, filePath[512] = "";
 
  public:
   Vector<ArrayGuiNode> nodes;
-  StaticArray() {
-    nodes.reserve(maxSize);
-    n = 5 + rand() % (maxSize - 10);
-    for (int i = 0; i < maxSize; i++) {
-      nodes.push_back(ArrayGuiNode());
-    }
-    for (int i = 0; i < nodes.capacity(); i++) {
-      nodes[i].setVal(0);
-      nodes[i].setCurPos({BASE_X + 42 * i, BASE_Y});
-    }
-  }
+  DynamicArray() { n = 0; }
 
   void render() {
     Vector2 textPos = MeasureTextEx(font_bold, "Static Array", 40, 1);
@@ -41,9 +33,14 @@ class StaticArray {
     if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
       curScreen = 0;
     }
-    DrawRectangleRounded({80, 335, 160, 310}, 0.12, 20, backgroundColor2);
-    DrawRectangleRoundedLines({80, 335, 160, 310}, 0.12, 20, 2,
+    DrawRectangleRounded({80, 275, 160, 370}, 0.12, 20, backgroundColor2);
+    DrawRectangleRoundedLines({80, 275, 160, 370}, 0.12, 20, 2,
                               ColorAlpha(textColor, 0.6));
+
+    if (GuiButton({110, 290, 100, 40}, "Allocate")) {
+      reset();
+      showAllocateButtons = true;
+    }
 
     if (GuiButton({110, 350, 100, 40}, "Create")) {
       reset();
@@ -66,6 +63,30 @@ class StaticArray {
       showUpdateButtons = true;
     }
 
+    if (showAllocateButtons) {
+      if (DrawInputBox({280, 290, 60, 30}, "", input[0], value[0],
+                       enableInput[0], ICON_PLUS)) {
+        // n = value[0];
+        nodes = Vector<ArrayGuiNode>();
+        nodes.reserve(value[0]);
+        for (int i = 0; i < nodes.capacity(); i++)
+          nodes.push_back(ArrayGuiNode());
+        // for (int i = 0; i < n; i++) {
+        //   nodes.push_back(ArrayGuiNode());
+        //   nodes[i].setVal(0);
+        //   nodes[i].setIndex(i);
+        //   nodes[i].setHasValue(true);
+        //   nodes[i].setCurPos({BASE_X + 42 * i, BASE_Y});
+        // }
+        // maxSize = nodes.capacity();
+        // for (int i = 0; i < maxSize; i++) {
+        //   nodes[i].setCurPos({BASE_X + 42 * i, BASE_Y});
+        // }
+        showAllocateButtons = false;
+        strcpy(input[0], "");
+      }
+    }
+
     if (showAddButtons) {
       if (GuiButton({280, 410, 100, 40}, "Add to head")) {
         memset(showInputBox, 0, sizeof(showInputBox));
@@ -77,6 +98,7 @@ class StaticArray {
           currentIndex = 0;
           val = value[0];
           isAddToIndex = true;
+          extend = false;
           startTime = GetTime();
           step = 0;
           showInputBox[0] = false;
@@ -94,6 +116,7 @@ class StaticArray {
           val = value[0];
           startTime = GetTime();
           isPushBack = true;
+          extend = false;
           step = 0;
           showInputBox[1] = false;
           strcpy(input[0], "");
@@ -111,6 +134,7 @@ class StaticArray {
           } else {
             val = value[0];
             startTime = GetTime();
+            extend = false;
             isAddToIndex = true;
             step = 0;
           }
@@ -222,6 +246,7 @@ class StaticArray {
         nodes[i].setIsSelected(false);
     }
     for (int i = 0; i < nodes.capacity(); i++) {
+      nodes[i].setCurPos({BASE_X + 42 * i, BASE_Y});
       nodes[i].render();
     }
 
@@ -236,6 +261,14 @@ class StaticArray {
             (float)(42 * (n - currentIndex) + 18),
             50,
         };
+        if (n == nodes.capacity() && !extend) {
+          extend = true;
+          nodes.reserve(nodes.capacity() * 2 + 1);
+          for (int i = n; i < nodes.capacity(); i++) {
+            CustomLog(LOG_INFO, TextFormat("%d", i), 0);
+            nodes[i] = ArrayGuiNode();
+          }
+        }
         DrawRectangleLinesEx(rect, 2, textColor);
         if (GetTime() - startTime > 1) {
           startTime = GetTime();
@@ -250,10 +283,8 @@ class StaticArray {
         };
         DrawRectangleLinesEx(rect, 2, textColor);
         if (GetTime() - startTime > 1) {
-          startTime = GetTime();
           nodes[n].setHasValue(true);
           nodes[n].setIndex(n);
-          nodes[n].setVal(0);
           for (int i = n; i > currentIndex; i--) {
             nodes[i].setVal(nodes[i - 1].val);
           }
@@ -277,13 +308,22 @@ class StaticArray {
         isPushBack = false;
       } else if (step == 0) {
         if (GetTime() - startTime > 0.5) {
+          if (n == nodes.capacity() && !extend) {
+            extend = true;
+            nodes.reserve(nodes.capacity() * 2 + 1);
+            for (int i = n; i < nodes.capacity(); i++)
+              nodes[i] = ArrayGuiNode();
+          }
           n++;
           startTime = GetTime();
           step++;
         }
       } else if (step == 1) {
-        nodes[n - 1].setVal(val);
-        isPushBack = false;
+        if (GetTime() - startTime > 0.5) {
+          nodes[n - 1].setVal(val);
+          nodes[n - 1].setHasValue(true);
+          isPushBack = false;
+        }
       }
     }
 
