@@ -53,7 +53,7 @@ class Stack {
   void search(int val = -1);
   void animate();
   void createRandomList();
-  void addFromFile();
+  void addFromFile(const char *filePath);
   void setIsLast();
   void update();
 };

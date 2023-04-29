@@ -14,7 +14,7 @@ bool MenuItem::render() {
 
   Vector2 pos = MeasureTextEx(font_bold, text, 20, 1);
   DrawTextEx(font_bold, text, {rect.x + (rect.width - pos.x) / 2, rect.y + 127},
-             20, 1, WHITE);
+             20, 1, textColor);
   if (IsMouseButtonDown(0) && CheckCollisionPointRec(GetMousePosition(), rect))
     return true;
 

@@ -149,7 +149,7 @@ class GuiNode {
     Vector2 textPos = MeasureTextEx(font_bold, TextFormat("%d", val), 22, 1);
     if (isStackNode) {
       DrawRectangleRoundedLines(rect, 0.12, 20, 2,
-                                Fade(primaryColor, curOpacity));
+                                Fade(textColor, curOpacity));
       DrawTextEx(font_bold, TextFormat("%d", val),
                  {rect.x + (rect.width - textPos.x) / 2,
                   rect.y + (rect.height - textPos.y) / 2},
@@ -164,7 +164,7 @@ class GuiNode {
       }
     } else if (isQueueNode) {
       DrawRectangleRoundedLines(rect, 0.12, 20, 2,
-                                Fade(primaryColor, curOpacity));
+                                Fade(textColor, curOpacity));
       DrawTextEx(font_bold, TextFormat("%d", val),
                  {curPos.x + (rect.width - textPos.x) / 2,
                   curPos.y + (rect.height - textPos.y) / 2},
@@ -181,7 +181,7 @@ class GuiNode {
       if (isHighlighted || isSelected) {
         DrawRectangleRounded(rect, 0.12, 20, Fade(highlightColor, curOpacity));
         DrawRectangleRoundedLines(rect, 0.12, 20, 2,
-                                  Fade(primaryColor, curOpacity));
+                                  Fade(textColor, curOpacity));
         DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                    Fade(WHITE, curOpacity));
         DrawTextEx(font_bold, TextFormat("%d", val),
@@ -202,9 +202,9 @@ class GuiNode {
       } else {
         DrawRectangleRoundedLines(
             rect, 0.12, 20, 2,
-            ColorAlpha(primaryColor, (unsigned char)(curOpacity * 255)));
+            ColorAlpha(textColor, (unsigned char)(curOpacity * 255)));
         DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
-                   Fade(primaryColor, curOpacity));
+                   Fade(textColor, curOpacity));
         DrawTextEx(font_bold, TextFormat("%d", val),
                    {curPos.x + 20, curPos.y + 16}, 22, 1,
                    Fade(textColor, curOpacity));
@@ -213,7 +213,7 @@ class GuiNode {
       if (isHighlighted || isSelected) {
         DrawRectangleRounded(rect, 0.12, 20, Fade(highlightColor, curOpacity));
         DrawRectangleRoundedLines(rect, 0.12, 20, 2,
-                                  Fade(primaryColor, curOpacity));
+                                  Fade(textColor, curOpacity));
         DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
                    Fade(WHITE, curOpacity));
         DrawLineEx({curPos.x + 18, curPos.y}, {curPos.x + 18, curPos.y + 50}, 2,
@@ -236,9 +236,9 @@ class GuiNode {
       } else {
         DrawRectangleRoundedLines(
             rect, 0.12, 20, 2,
-            ColorAlpha(primaryColor, (unsigned char)(curOpacity * 255)));
+            ColorAlpha(textColor, (unsigned char)(curOpacity * 255)));
         DrawLineEx({curPos.x + 52, curPos.y}, {curPos.x + 52, curPos.y + 50}, 2,
-                   Fade(primaryColor, curOpacity));
+                   Fade(textColor, curOpacity));
         DrawLineEx({curPos.x + 18, curPos.y}, {curPos.x + 18, curPos.y + 50}, 2,
                    Fade(WHITE, curOpacity));
         DrawTextEx(font_bold, TextFormat("%d", val),

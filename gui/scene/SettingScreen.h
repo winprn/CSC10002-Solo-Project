@@ -2,7 +2,7 @@
 #define SETTING_SCREEN_H
 
 #include "../../lib/raygui.h"
-#include "../../lib/gui_file_dialog.h"
+#include "../../lib/tinyfiledialogs.h"
 #include "../../utils/Helper.h"
 #include "../../utils/Settings.h"
 #include "../components/ColorSelector.h"
@@ -18,7 +18,6 @@ class SettingScreen {
 
  public:
   char filePath[512] = {0};
-  GuiFileDialogState fileDialogState = InitGuiFileDialog(GetWorkingDirectory());
 
   void render() {
     if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
@@ -47,21 +46,17 @@ class SettingScreen {
       printColorToFile(textColor);
     }
     if (GuiButton({551, 520, 180, 40}, GuiIconText(5, "Load config"))) {
-      fileDialogState.windowActive = true;
+      const char* filePath =
+          tinyfd_openFileDialog("Open File", "", 0, NULL, NULL, 0);
+      loadConfig(filePath);
+      colorUpdated = true;
     }
-    if (fileDialogState.windowActive)
-      GuiLock();
-    GuiUnlock();
-    if (fileDialogState.SelectFilePressed) {
-      if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
-        strcpy(filePath, fileDialogState.fileNameText);
-        CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-        loadConfig(filePath);
-        colorUpdated = true;
-      }
-      fileDialogState.SelectFilePressed = false;
+    if (GuiButton({551, 575, 180, 40}, GuiIconText(5, "Load font"))) {
+      const char* filePath =
+          tinyfd_openFileDialog("Open File", "", 0, NULL, NULL, 0);
+      CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
+      font_regular = font_bold = LoadFontEx(filePath, 96, NULL, 0);
     }
-    GuiFileDialog(&fileDialogState);
   }
 };
 

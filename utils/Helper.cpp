@@ -68,7 +68,7 @@ void printColorToFile(Color color) {
   fclose(out);
 }
 
-void loadConfig(char* filePath) {
+void loadConfig(const char* filePath) {
   char* fileData = LoadFileText(filePath);
   strtok(fileData, "\n");
   int cnt = 0;

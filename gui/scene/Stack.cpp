@@ -1,5 +1,5 @@
 #include "Stack.h"
-#include "../../lib/gui_file_dialog.h"
+#include "../../lib/tinyfiledialogs.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
 #include "../../utils/Log.h"
@@ -638,24 +638,16 @@ void Stack::render() {
       index = -1;
   }
   if (showCreateButtons) {
-    if (GuiButton({280, 415, 100, 40}, "Random")) {
+    if (GuiButton({280, 350, 100, 40}, "Random")) {
       createRandomList();
     }
-    if (GuiButton({400, 415, 100, 40}, "From file")) {
-      fileDialogState.windowActive = true;
-    }
-    if (fileDialogState.windowActive)
-      GuiLock();
-    GuiUnlock();
-    if (fileDialogState.SelectFilePressed) {
-      if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
-        strcpy(filePath, fileDialogState.fileNameText);
-        CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-        addFromFile();
+    if (GuiButton({400, 350, 100, 40}, "From file")) {
+      const char* fileName =
+          tinyfd_openFileDialog("Choose a file", "", 0, nullptr, nullptr, 0);
+      if (fileName != nullptr) {
+        addFromFile(fileName);
       }
-      fileDialogState.SelectFilePressed = false;
     }
-    GuiFileDialog(&fileDialogState);
   }
   if (GetTime() - errStartTime < 2 && errStartTime > 0) {
     DrawTextEx(font_bold, errMessage, {50, 250}, 22, 1, textColor);
@@ -827,7 +819,7 @@ void Stack::createRandomList() {
   setIsLast();
 }
 
-void Stack::addFromFile() {
+void Stack::addFromFile(const char *filePath) {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");

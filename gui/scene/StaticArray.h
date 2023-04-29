@@ -328,25 +328,17 @@ class StaticArray {
     }
 
     if (showCreateButtons) {
-      if (GuiButton({280, 350, 100, 40}, "Random")) {
-        createRandomArray();
-      }
-      if (GuiButton({400, 350, 100, 40}, "From file")) {
-        fileDialogState.windowActive = true;
-      }
-      if (fileDialogState.windowActive)
-        GuiLock();
-      GuiUnlock();
-      if (fileDialogState.SelectFilePressed) {
-        if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
-          strcpy(filePath, fileDialogState.fileNameText);
-          CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-          addFromFile();
-        }
-        fileDialogState.SelectFilePressed = false;
-      }
-      GuiFileDialog(&fileDialogState);
+    if (GuiButton({280, 350, 100, 40}, "Random")) {
+      createRandomArray();
     }
+    if (GuiButton({400, 350, 100, 40}, "From file")) {
+      const char *fileName = tinyfd_openFileDialog(
+          "Choose a file", "", 0, nullptr, nullptr, 0);
+      if (fileName != nullptr) {
+        addFromFile(fileName);
+      }
+    }
+  }
 
     if (GetTime() - notiTime < 2 && notiTime > 0) {
       Vector2 textPos = MeasureTextEx(font_bold, notiMessage, 22, 1);
@@ -400,7 +392,7 @@ class StaticArray {
     }
   }
 
-  void addFromFile() {
+  void addFromFile(const char *filePath) {
     for (int i = 0; i < maxSize; i++) {
       nodes[i].setVal(0);
       nodes[i].setHasValue(false);

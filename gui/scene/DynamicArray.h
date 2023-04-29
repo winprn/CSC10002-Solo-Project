@@ -27,8 +27,8 @@ class DynamicArray {
   DynamicArray() { n = 0; }
 
   void render() {
-    Vector2 textPos = MeasureTextEx(font_bold, "Static Array", 40, 1);
-    DrawTextEx(font_bold, "Static Array", {(1280 - textPos.x) / 2, 20}, 40, 1,
+    Vector2 textPos = MeasureTextEx(font_bold, "Dynamic Array", 40, 1);
+    DrawTextEx(font_bold, "Dynamic Array", {(1280 - textPos.x) / 2, 20}, 40, 1,
                WHITE);
     if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
       curScreen = 0;
@@ -372,20 +372,12 @@ class DynamicArray {
         createRandomArray();
       }
       if (GuiButton({400, 350, 100, 40}, "From file")) {
-        fileDialogState.windowActive = true;
-      }
-      if (fileDialogState.windowActive)
-        GuiLock();
-      GuiUnlock();
-      if (fileDialogState.SelectFilePressed) {
-        if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
-          strcpy(filePath, fileDialogState.fileNameText);
-          CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-          addFromFile();
+        const char* fileName =
+            tinyfd_openFileDialog("Choose a file", "", 0, nullptr, nullptr, 0);
+        if (fileName != nullptr) {
+          addFromFile(fileName);
         }
-        fileDialogState.SelectFilePressed = false;
       }
-      GuiFileDialog(&fileDialogState);
     }
 
     if (GetTime() - notiTime < 2 && notiTime > 0) {
@@ -440,7 +432,7 @@ class DynamicArray {
     }
   }
 
-  void addFromFile() {
+  void addFromFile(const char *filePath) {
     for (int i = 0; i < maxSize; i++) {
       nodes[i].setVal(0);
       nodes[i].setHasValue(false);

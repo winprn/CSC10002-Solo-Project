@@ -23,9 +23,9 @@ using namespace std;
 
 void drawMenu() {
   DrawTextEx(Settings::font_regular, "Welcome to VisuAlgo - cloned by @winprn",
-             {266, 32}, 48, 1, Color({233, 236, 239, 255}));
+             {266, 32}, 48, 1, textColor);
   DrawTextEx(Settings::font_regular, "Ly Dinh Minh Man - 22127255 - 22CLC06",
-             {424, 98}, 24, 1, Color({233, 236, 239, 255}));
+             {424, 98}, 24, 1, textColor);
   Image logo = LoadImage("images/logo.png");
   Texture logoTexture = LoadTextureFromImage(logo);
   DrawTexture(logoTexture, 10, 25, WHITE);
@@ -62,7 +62,7 @@ void drawMenu() {
 
 void drawSettingButton() {
   if (GuiButton({1173, 30, 50, 50}, GuiIconText(140, ""), true)) {
-    curScreen = 7;
+    curScreen = SETTING_SCREEN;
   }
 }
 
@@ -83,7 +83,6 @@ int main() {
   GuiLoadStyle("gui/styles.rgs");
   GuiLoadIcons("gui/iconset.rgi", NULL);
   GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
-  GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(WHITE));
   Arrow arr({50, 300}, {100, 360});
   bool ok = 0;
   Settings::font_regular =
@@ -96,6 +95,8 @@ int main() {
     GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(accentColor));
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(accentColor2));
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(accentColor2));
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(textColor));
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(textColor));
     switch (curScreen) {
       case HOME_SCREEN:
         drawMenu();

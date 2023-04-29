@@ -26,7 +26,7 @@ char* intToHex(int num);
 
 void printColorToFile(Color color);
 
-void loadConfig(char* filePath);
+void loadConfig(const char* filePath);
 
 float getAngle(Vector2 a, Vector2 b, Vector2 c);
 

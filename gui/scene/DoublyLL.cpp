@@ -1,5 +1,5 @@
 #include "DoublyLL.h"
-#include "../../lib/gui_file_dialog.h"
+#include "../../lib/tinyfiledialogs.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
 #include "../../utils/Log.h"
@@ -865,20 +865,12 @@ void DoublyLL::render() {
       createRandomList();
     }
     if (GuiButton({400, 350, 100, 40}, "From file")) {
-      fileDialogState.windowActive = true;
-    }
-    if (fileDialogState.windowActive)
-      GuiLock();
-    GuiUnlock();
-    if (fileDialogState.SelectFilePressed) {
-      if (IsFileExtension(fileDialogState.fileNameText, ".txt")) {
-        strcpy(filePath, fileDialogState.fileNameText);
-        CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-        addFromFile();
+      const char* fileName =
+          tinyfd_openFileDialog("Choose a file", "", 0, nullptr, nullptr, 0);
+      if (fileName != nullptr) {
+        addFromFile(fileName);
       }
-      fileDialogState.SelectFilePressed = false;
     }
-    GuiFileDialog(&fileDialogState);
   }
 
   if (GetTime() - errStartTime < 2 && errStartTime > 0) {
@@ -1061,7 +1053,7 @@ void DoublyLL::createRandomList() {
   setIsLast();
 }
 
-void DoublyLL::addFromFile() {
+void DoublyLL::addFromFile(const char *filePath) {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");
