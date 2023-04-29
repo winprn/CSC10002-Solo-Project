@@ -22,19 +22,22 @@ void Queue::render() {
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }
+  DrawRectangleRounded({80, 335, 160, 250}, 0.12, 20, backgroundColor2);
+  DrawRectangleRoundedLines({80, 335, 160, 250}, 0.12, 20, 2,
+                            ColorAlpha(textColor, 0.6));
 
   DrawLineEx({290, 200}, {990, 200}, 2, textColor);
   DrawLineEx({290, 330}, {990, 330}, 2, textColor);
 
-  if (GuiButton({100, 415, 100, 40}, "Create")) {
+  if (GuiButton({110, 350, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;
   }
-  if (GuiButton({100, 475, 100, 40}, "Push")) {
+  if (GuiButton({110, 410, 100, 40}, "Push")) {
     reset();
     showAddButtons = true;
   }
-  if (GuiButton({100, 535, 100, 40}, "Pop")) {
+  if (GuiButton({110, 470, 100, 40}, "Pop")) {
     reset();
     index = 1;
     isRemoveHead = true;
@@ -42,6 +45,12 @@ void Queue::render() {
     shouldHighlight = false;
     needUpdate = true;
     showDeleteButtons = false;
+    memset(lineHighlight, 0, sizeof(lineHighlight));
+  }
+  if (GuiButton({110, 530, 100, 40}, "Clear")) {
+    reset();
+    removeAll();
+    head = tail = nullptr;
     memset(lineHighlight, 0, sizeof(lineHighlight));
   }
 

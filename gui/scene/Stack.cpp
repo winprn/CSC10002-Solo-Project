@@ -22,20 +22,23 @@ void Stack::render() {
   if (GuiButton({25, 35, 100, 40}, GuiIconText(118, "Back"))) {
     curScreen = 0;
   }
+  DrawRectangleRounded({80, 335, 160, 250}, 0.12, 20, backgroundColor2);
+  DrawRectangleRoundedLines({80, 335, 160, 250}, 0.12, 20, 2,
+                            ColorAlpha(textColor, 0.6));
 
   DrawLineEx({575, 200}, {575, 580}, 2, textColor);
   DrawLineEx({575, 580}, {705, 580}, 2, textColor);
   DrawLineEx({705, 580}, {705, 200}, 2, textColor);
 
-  if (GuiButton({100, 415, 100, 40}, "Create")) {
+  if (GuiButton({110, 350, 100, 40}, "Create")) {
     reset();
     showCreateButtons = true;
   }
-  if (GuiButton({100, 475, 100, 40}, "Push")) {
+  if (GuiButton({110, 410, 100, 40}, "Push")) {
     reset();
     showAddButtons = true;
   }
-  if (GuiButton({100, 535, 100, 40}, "Pop")) {
+  if (GuiButton({110, 470, 100, 40}, "Pop")) {
     reset();
     index = 1;
     isRemoveHead = true;
@@ -45,9 +48,15 @@ void Stack::render() {
     showDeleteButtons = false;
     memset(lineHighlight, 0, sizeof(lineHighlight));
   }
+  if (GuiButton({110, 530, 100, 40}, "Clear")) {
+    reset();
+    removeAll();
+    head = tail = nullptr;
+    memset(lineHighlight, 0, sizeof(lineHighlight));
+  }
 
   if (showAddButtons) {
-    if (DrawInputBox({280, 475, 60, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({280, 410, 60, 30}, "", input[0], value[0], enableInput[0],
                      ICON_PLUS)) {
       if (getSize() < 7) {
         index = 1;
