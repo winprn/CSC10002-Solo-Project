@@ -82,7 +82,6 @@ int main() {
       st.createRandomList(), qu.createRandomList();
   GuiLoadStyle("gui/styles.rgs");
   GuiLoadIcons("gui/iconset.rgi", NULL);
-  GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
   Arrow arr({50, 300}, {100, 360});
   bool ok = 0;
   Settings::font_regular =
@@ -95,8 +94,11 @@ int main() {
     GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, ColorToInt(accentColor));
     GuiSetStyle(BUTTON, BASE_COLOR_FOCUSED, ColorToInt(accentColor2));
     GuiSetStyle(BUTTON, BASE_COLOR_PRESSED, ColorToInt(accentColor2));
+    GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, ColorToInt(textColor));
     GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(textColor));
     GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(textColor));
+    GuiSetFont(Settings::font_regular);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
     switch (curScreen) {
       case HOME_SCREEN:
         drawMenu();

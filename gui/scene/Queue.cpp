@@ -55,7 +55,7 @@ void Queue::render() {
   }
 
   if (showAddButtons) {
-    if (DrawInputBox({280, 475, 60, 30}, "", input[0], value[0], enableInput[0],
+    if (DrawInputBox({280, 410, 60, 30}, "", input[0], value[0], enableInput[0],
                      ICON_PLUS)) {
       if (getSize() < 7) {
         index = getSize() + 1;

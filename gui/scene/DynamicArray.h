@@ -66,11 +66,9 @@ class DynamicArray {
     if (showAllocateButtons) {
       if (DrawInputBox({280, 290, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
-        // n = value[0];
+        n = 0;
         nodes = Vector<ArrayGuiNode>();
         nodes.reserve(value[0]);
-        for (int i = 0; i < nodes.capacity(); i++)
-          nodes.push_back(ArrayGuiNode());
         // for (int i = 0; i < n; i++) {
         //   nodes.push_back(ArrayGuiNode());
         //   nodes[i].setVal(0);
@@ -426,6 +424,8 @@ class DynamicArray {
   void createRandomArray() {
     removeAllFromArray();
     n = 5 + rand() % (maxSize - 10);
+    nodes = Vector<ArrayGuiNode>();
+    nodes.reserve(n);
     for (int i = 0; i < n; i++) {
       int val = 10 + rand() % 90;
       nodes[i].setVal(val);
@@ -450,7 +450,7 @@ class DynamicArray {
   }
 
   void removeAllFromArray() {
-    for (int i = 0; i < maxSize; i++) {
+    for (int i = 0; i < n; i++) {
       nodes[i].setVal(0);
       nodes[i].setHasValue(false);
     }

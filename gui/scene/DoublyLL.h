@@ -58,6 +58,7 @@ class DoublyLL {
   void update();
   void setArrNext(Node* cur);
   void setArrPrev(Node* cur);
+  void resetBeforeAnimate();
 };
 
 #endif

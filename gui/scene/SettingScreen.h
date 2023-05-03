@@ -40,6 +40,11 @@ class SettingScreen {
       colorUpdated = false;
     }
 
+    Rectangle rect = {897, 420, 70, 50};
+    DrawRectangleRoundedLines(rect, 0.12, 20, 2, primaryColor);
+    DrawLineEx({rect.x + 52, rect.y}, {rect.x + 52, rect.y + 50}, 2,
+               primaryColor);
+
     if (GuiButton({551, 465, 180, 40}, GuiIconText(2, "Save config"))) {
       printColorToFile(backgroundColor);
       printColorToFile(accentColor);
@@ -53,9 +58,30 @@ class SettingScreen {
     }
     if (GuiButton({551, 575, 180, 40}, GuiIconText(5, "Load font"))) {
       const char* filePath =
-          tinyfd_openFileDialog("Open File", "", 0, NULL, NULL, 0);
+          tinyfd_openFileDialog("Open File", "", 0, NULL, NULL, 1);
       CustomLog(LOG_INFO, TextFormat("Selected file: %s", filePath), 0);
-      font_regular = font_bold = LoadFontEx(filePath, 96, NULL, 0);
+      char* regularPath = (char*)malloc(strlen(filePath) + 1);
+      char* boldPath = (char*)malloc(strlen(filePath) + 1);
+
+      // read the file path until meets the pipe character
+      int i = 0;
+      while (filePath[i] != '|') {
+        boldPath[i] = filePath[i];
+        i++;
+      }
+      boldPath[i] = '\0';
+      i++;
+      int j = 0;
+      while (filePath[i] != '\0') {
+        regularPath[j] = filePath[i];
+        i++;
+        j++;
+      }
+      regularPath[j] = '\0';
+
+      // load the font into font_regular and font_bold
+      font_regular = LoadFontEx(regularPath, 96, NULL, 0);
+      font_bold = LoadFontEx(boldPath, 96, NULL, 0);
     }
   }
 };

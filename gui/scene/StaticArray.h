@@ -18,7 +18,7 @@ class StaticArray {
   bool selected[30] = {false}, showInputBox[10] = {false},
        enableInput[10] = {false};
   int value[10] = {0};
-  char *notiMessage = new char[50], input[10][10], filePath[512] = "";
+  char *notiMessage = new char[50], input[10][10] = {""}, filePath[512] = "";
 
  public:
   Vector<ArrayGuiNode> nodes;

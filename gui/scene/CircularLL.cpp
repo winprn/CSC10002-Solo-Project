@@ -70,6 +70,7 @@ void CircularLL::render() {
     if (showInputBox[0]) {
       if (DrawInputBox({280, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
+        resetBeforeAnimate();
         index = 1;
         isAddToHead = true;
         shouldMoveUp = false;
@@ -86,6 +87,7 @@ void CircularLL::render() {
     if (showInputBox[1]) {
       if (DrawInputBox({400, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
+        resetBeforeAnimate();
         index = getSize() + 1;
         isAddToTail = true;
         isNodeNext = false;
@@ -106,6 +108,7 @@ void CircularLL::render() {
         if (currentIndex == -1) {
           errStartTime = GetTime();
         } else {
+          resetBeforeAnimate();
           index = currentIndex;
           isAddToIndex = true;
           shouldHighlight = false;
@@ -124,6 +127,7 @@ void CircularLL::render() {
   }
   if (showDeleteButtons) {
     if (GuiButton({280, 470, 100, 40}, "Delete head")) {
+      resetBeforeAnimate();
       index = 1;
       isRemoveHead = true;
       animDone = false;
@@ -132,6 +136,7 @@ void CircularLL::render() {
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
     if (GuiButton({400, 470, 100, 40}, "Delete tail")) {
+      resetBeforeAnimate();
       index = getSize();
       isDeleting = true;
       shouldHighlight = false;
@@ -144,6 +149,7 @@ void CircularLL::render() {
       if (currentIndex == -1) {
         errStartTime = GetTime();
       } else {
+        resetBeforeAnimate();
         index = currentIndex;
         isRemoveIndex = true;
         shouldHighlight = false;
@@ -160,6 +166,7 @@ void CircularLL::render() {
   if (showSearchButtons) {
     if (DrawInputBox({250, 530, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_LENS)) {
+      resetBeforeAnimate();
       index = value[0];
       isSearching = true;
       shouldHighlight = false;
@@ -176,6 +183,7 @@ void CircularLL::render() {
       if (currentIndex == -1) {
         errStartTime = GetTime();
       } else {
+        resetBeforeAnimate();
         index = currentIndex;
         newVal = value[0];
         isUpdating = true;
@@ -205,7 +213,7 @@ void CircularLL::render() {
     DrawTexture(texture, 895, 490, WHITE);
   }
   if (isAddToTail) {
-    Image img = LoadImage("images/SLL/add_tail.png");
+    Image img = LoadImage("images/CLL/add_tail.png");
     // read image from file and draw it
     Texture2D texture = LoadTextureFromImage(img);
     DrawTexture(texture, 895, 490, WHITE);
@@ -223,7 +231,7 @@ void CircularLL::render() {
     DrawTexture(texture, 895, 490, WHITE);
   }
   if (isRemoveTail) {
-    Image img = LoadImage("images/SLL/remove_tail.png");
+    Image img = LoadImage("images/CLL/remove_tail.png");
     // read image from file and draw it
     Texture2D texture = LoadTextureFromImage(img);
     DrawTexture(texture, 895, 490, WHITE);
@@ -415,7 +423,7 @@ void CircularLL::render() {
           {cur->next->guiNode.getCurPos().x,
            cur->next->guiNode.getCurPos().y + 25});
     }
-    if (cur == tail) {
+    if (cur == tail && !isAddToTail) {
       cur->guiNode.setArrowNext(
           {cur->guiNode.getCurPos().x + 60, cur->guiNode.getCurPos().y + 25},
           {head->guiNode.getCurPos().x + 30, head->guiNode.getCurPos().y + 50});
@@ -970,4 +978,13 @@ void CircularLL::setIsLast() {
 void CircularLL::update() {
   isUpdating = true;
   animate();
+}
+
+void CircularLL::resetBeforeAnimate() {
+  searchDone = true, animDone = true, isAdding = false, isDeleting = false,
+  isUpdating = false, isSearching = false, shouldHighlight = true,
+  shouldMoveUp = true, needUpdate = true, found = false, isAddToHead = false,
+  isAddToTail = false, isAddToIndex = false, isRemoveHead = false,
+  isRemoveTail = false, isRemoveIndex = false, isNodeNext = false,
+  isCodeNext = false;
 }

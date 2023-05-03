@@ -1,7 +1,7 @@
 #include "DoublyLL.h"
-#include "../../lib/tinyfiledialogs.h"
 #include "../../lib/raygui.h"
 #include "../../lib/raylib.h"
+#include "../../lib/tinyfiledialogs.h"
 #include "../../utils/Log.h"
 #include "../../utils/Settings.h"
 #include "../components/GuiNode.h"
@@ -68,6 +68,7 @@ void DoublyLL::render() {
     if (showInputBox[0]) {
       if (DrawInputBox({280, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
+        resetBeforeAnimate();
         index = 1;
         isAddToHead = true;
         shouldMoveUp = false;
@@ -84,6 +85,7 @@ void DoublyLL::render() {
     if (showInputBox[1]) {
       if (DrawInputBox({400, 470, 60, 30}, "", input[0], value[0],
                        enableInput[0], ICON_PLUS)) {
+        resetBeforeAnimate();
         index = getSize() + 1;
         isAddToTail = true;
         isNodeNext = false;
@@ -104,6 +106,7 @@ void DoublyLL::render() {
         if (currentIndex == -1) {
           errStartTime = GetTime();
         } else {
+          resetBeforeAnimate();
           index = currentIndex;
           isAddToIndex = true;
           shouldHighlight = false;
@@ -122,6 +125,7 @@ void DoublyLL::render() {
   }
   if (showDeleteButtons) {
     if (GuiButton({280, 470, 100, 40}, "Delete head")) {
+      resetBeforeAnimate();
       index = 1;
       isRemoveHead = true;
       animDone = false;
@@ -130,6 +134,7 @@ void DoublyLL::render() {
       memset(lineHighlight, 0, sizeof(lineHighlight));
     }
     if (GuiButton({400, 470, 100, 40}, "Delete tail")) {
+      resetBeforeAnimate();
       index = getSize();
       isDeleting = true;
       shouldHighlight = false;
@@ -142,6 +147,7 @@ void DoublyLL::render() {
       if (currentIndex == -1) {
         errStartTime = GetTime();
       } else {
+        resetBeforeAnimate();
         index = currentIndex;
         isRemoveIndex = true;
         isDeleting = true;
@@ -159,6 +165,7 @@ void DoublyLL::render() {
   if (showSearchButtons) {
     if (DrawInputBox({250, 530, 50, 30}, "", input[0], value[0], enableInput[0],
                      ICON_LENS)) {
+      resetBeforeAnimate();
       index = value[0];
       isSearching = true;
       shouldHighlight = false;
@@ -176,6 +183,7 @@ void DoublyLL::render() {
       if (currentIndex == -1) {
         errStartTime = GetTime();
       } else {
+        resetBeforeAnimate();
         index = currentIndex;
         newVal = value[0];
         isUpdating = true;
@@ -592,7 +600,7 @@ void DoublyLL::render() {
             if ((isSearching && cur->next->val == value[0]) ||
                 idx + 1 == index) {
               if (isSearching) {
-                cur->next->guiNode.setHighLightColor(GREEN);
+                cur->next->guiNode.setHighLightColor(accentColor);
               }
               if (!isRemoveTail && !isRemoveIndex)
                 cur->next->guiNode.setNewHighlight(2);
@@ -857,7 +865,8 @@ void DoublyLL::render() {
         cur->guiNode.setHighLightColor();
       cur->guiNode.setIsDone(false);
     }
-    if (!isAddToIndex && !isRemoveTail && !isRemoveIndex && !isDeleting && !isUpdating)
+    if (!isAddToIndex && !isRemoveTail && !isRemoveIndex && !isDeleting &&
+        !isUpdating)
       index = -1;
   }
   if (showCreateButtons) {
@@ -1053,7 +1062,7 @@ void DoublyLL::createRandomList() {
   setIsLast();
 }
 
-void DoublyLL::addFromFile(const char *filePath) {
+void DoublyLL::addFromFile(const char* filePath) {
   removeAll();
   fileData = LoadFileText(filePath);
   strtok(fileData, ",");
@@ -1098,4 +1107,13 @@ void DoublyLL::setArrPrev(Node* cur) {
         {cur->prev->guiNode.getCurPos().x + 70,
          cur->prev->guiNode.getCurPos().y + 15});
   }
+}
+
+void DoublyLL::resetBeforeAnimate() {
+  searchDone = true, animDone = true, isAdding = false, isDeleting = false,
+  isUpdating = false, isSearching = false, shouldHighlight = true,
+  shouldMoveUp = true, needUpdate = true, found = false, isAddToHead = false,
+  isAddToTail = false, isAddToIndex = false, isRemoveHead = false,
+  isRemoveTail = false, isRemoveIndex = false, isNodeNext = false,
+  isCodeNext = false;
 }

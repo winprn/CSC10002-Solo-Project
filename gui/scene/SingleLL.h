@@ -56,6 +56,7 @@ class SingleLL {
   void addFromFile(const char *filePath);
   void setIsLast();
   void update();
+  void resetBeforeAnimate();
 };
 
 #endif
